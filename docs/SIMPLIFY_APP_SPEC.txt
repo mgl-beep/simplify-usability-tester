@@ -1,0 +1,760 @@
+<project_specification>
+  <project_name>SIMPLIFY — Canvas LMS Accessibility &amp; Quality Scanner</project_name>
+
+  <overview>
+    SIMPLIFY is a web application for California Community College faculty and instructional designers
+    that scans Canvas LMS courses for accessibility violations and quality rubric compliance issues,
+    suggests AI-powered fixes, and publishes approved corrections back to Canvas.
+
+    The app targets three standards frameworks simultaneously:
+    - CVC-OEI Course Design Rubric (Sections A–D) — California Virtual Campus accessibility standard
+    - Quality Matters 7th Edition (Standards 1–8) — national online course quality benchmark
+    - Peralta Online Equity Rubric v3.0 (Standards E1–E8) — equity-focused design standard
+
+    Core workflow: Connect Canvas → Select Course → Scan → Review Issues → Stage Fix → Publish to Canvas
+
+    The application runs entirely in the browser (React SPA). All Canvas API calls are proxied through
+    a Supabase Edge Function to bypass CORS. Authentication is token-based (Canvas Personal Access Token).
+    There is no native Canvas LTI integration yet.
+
+    Live URL: https://simplify-lti.vercel.app
+  </overview>
+
+  <technology_stack>
+    <frontend>
+      <framework>React 18 + TypeScript</framework>
+      <build_tool>Vite 6 (dev server on port 3000)</build_tool>
+      <styling>Tailwind CSS + shadcn/ui (Radix UI primitives)</styling>
+      <state_management>React hooks — all state in App.tsx, prop drilling (no Redux/Zustand)</state_management>
+      <charts>Recharts for analytics visualizations</charts>
+      <animations>Framer Motion</animations>
+      <icons>Lucide React</icons>
+      <notifications>Sonner toast library</notifications>
+      <file_parsing>JSZip for IMSCC package extraction</file_parsing>
+      <build_output>build/ directory</build_output>
+      <port>Dev server runs on port 3000</port>
+    </frontend>
+    <backend>
+      <runtime>Supabase Edge Function (Deno + Hono framework)</runtime>
+      <function_name>make-server-74508696</function_name>
+      <database>Supabase PostgreSQL (imported courses only)</database>
+      <kv_store>Supabase KV for course data and scan results</kv_store>
+      <ai_provider>OpenAI GPT-4o Vision via Supabase Edge Function</ai_provider>
+    </backend>
+    <auth>
+      <method>Canvas Personal Access Token (PAT)</method>
+      <storage>localStorage (canvasToken, canvasDomain)</storage>
+      <security>Token sent only to Supabase proxy; proxy forwards to Canvas API with Bearer auth</security>
+    </auth>
+    <deployment>
+      <frontend_host>Vercel — auto-deploys on git push to main</frontend_host>
+      <backend_host>Supabase — manual deploy via CLI</backend_host>
+      <supabase_project_ref>nhmvhwmvstexeivayrgy</supabase_project_ref>
+    </deployment>
+    <commands>
+      <dev>npm run dev — starts Vite dev server on port 3000</dev>
+      <build>npm run build — production build to build/ directory</build>
+      <deploy_backend>/tmp/supabase functions deploy make-server-74508696 --project-ref nhmvhwmvstexeivayrgy --no-verify-jwt</deploy_backend>
+    </commands>
+  </technology_stack>
+
+  <architecture>
+    <state_management>
+      All global state lives in App.tsx (~1,800 lines). Key state variables:
+      - selectedCourse: {courseId, courseName, isImported} — the active course
+      - scanResults: ScanIssue[] — current course's detected issues
+      - allCourseScanResults: Record&lt;number, ScanIssue[]&gt; — per-course cached results
+      - isScanning: boolean — scan in progress flag
+      - enabledStandards: string[] — active rubric filters (cvc-oei, qm, peralta)
+      - aiSuggestionsCache: Record&lt;string, string&gt; — cached AI suggestions by element hash
+      - currentView: string — active page ("simplify" | "courses" | "analytics" | etc.)
+
+      Props drill from App.tsx → SimplifyDashboard → ScanPanel, Analytics, IssueDetailModal, etc.
+      No external state management library is used.
+    </state_management>
+
+    <data_flow>
+      1. Browser (React SPA) sends Canvas API requests to Supabase Edge Function
+      2. Edge Function forwards with Authorization: Bearer canvas_token to Canvas LMS API
+      3. Canvas returns HTML content
+      4. Edge Function relays response to browser
+      5. Browser parses HTML with DOMParser, runs scanners locally
+      6. ScanIssue[] stored in React state + localStorage cache
+      7. Fix staged locally (fixStaging.ts stores original + fixed HTML)
+      8. User reviews Before/After preview in IssueDetailModal
+      9. User confirms → canvasFixer.ts → Supabase Edge Function → Canvas API (PUT/POST)
+    </data_flow>
+
+    <scan_engine>
+      courseScanner.ts orchestrates five scanners sequentially:
+      1. accessibilityScanner.ts — WCAG 2.0 AA: alt text, headings, tables, contrast, lists
+      2. usabilityScanner.ts — CVC-OEI usability: captions, chunking, nav depth, content length
+      3. cvcOeiRubricScanner.ts — full CVC-OEI Sections A–D rubric (~80KB, largest scanner)
+      4. designScanner.ts — visual consistency: font families, styling patterns
+      5. linkDetector.ts — broken links, long URLs, unclear link text ("click here")
+
+      Each scanner is a pure function: takes HTML string → returns ScanIssue[].
+      standardsMapping.ts tags each issue with rubric codes after scanning.
+    </scan_engine>
+
+    <fix_engine>
+      Two-phase workflow enforced by fixStaging.ts:
+      Phase 1 — Stage: Generate fixed HTML locally, store original for undo, set status='staged'
+      Phase 2 — Publish: User confirms → canvasFixer.ts sends fixed HTML through Supabase proxy to Canvas API
+
+      canvasFixer.ts (~63KB) handles every fix type with dedicated cases per issue category.
+      Each issue category (alt-text, contrast, heading, table, link-text, objectives) has its own
+      rendering branch in IssueDetailModal.tsx (~186KB).
+    </fix_engine>
+
+    <ai_integration>
+      All AI calls route through aiFixerService.ts → Supabase Edge Function → OpenAI GPT-4o.
+      Supported AI features:
+      - Alt text generation (GPT-4o Vision — analyzes actual images)
+      - Table caption generation
+      - Link text suggestions (descriptive replacements for "click here")
+      - Learning objectives generation (Bloom's taxonomy aligned)
+      - Content rewriting (for dense paragraphs)
+      - Content template generation (for course builders)
+
+      AI suggestions are cached by element hash to avoid duplicate API calls.
+      AI NEVER publishes without explicit user confirmation.
+    </ai_integration>
+
+    <persistence>
+      All scan data persists to localStorage — no cloud sync for scan data:
+      - simplify_all_scan_results — ScanIssue[] per course, keyed by courseId
+      - simplify_all_scan_times — last scan timestamps per course
+      - simplify_enabled_standards — active rubric filter state
+      - canvasToken / canvasDomain — Canvas connection credentials
+
+      Guard: courseId=0 ("All Courses" view) is explicitly excluded from localStorage writes.
+    </persistence>
+  </architecture>
+
+  <scan_issue_schema>
+    Every detected issue conforms to this TypeScript interface:
+
+    interface ScanIssue {
+      id: string;                      // Unique identifier
+      type: string;                    // e.g., 'missing-alt-text', 'contrast', 'broken-link'
+      category: string;                // 'accessibility' | 'usability' | 'design' | 'content'
+      severity: 'high' | 'medium' | 'low';
+      title: string;                   // Human-readable issue title
+      description: string;             // Explanation of the problem
+      location: string;                // Human-readable location (e.g., "Week 1 Overview")
+      contentType: string;             // 'page' | 'assignment' | 'announcement' | 'discussion'
+      contentId: string | number;      // Canvas content ID for API updates
+      courseId?: number;                // Which course this belongs to
+      autoFixAvailable: boolean;       // Whether an automated fix can be generated
+      standardsTags: string[];         // e.g., ['cvc-oei:D7', 'qm:8.1', 'peralta:E3']
+      status: 'pending' | 'staged' | 'published' | 'ignored' | 'resolved';
+      elementHtml?: string;            // Raw HTML snippet that triggered the issue
+      textColor?: string;              // Detected text color (hex) for contrast issues
+      backgroundColor?: string;        // Effective background color (hex) for contrast issues
+      suggestedFix?: string;           // AI-generated or auto-generated fix suggestion
+      fixSteps?: string[];             // Step-by-step remediation instructions
+      originalContent?: string;        // Stored on staging for undo capability
+      whereToAddPageUrl?: string;      // For objectives issues: specific Canvas page URL
+      stagedFix?: object;              // Populated when fix is staged but not published
+    }
+
+    Standards tags format: always lowercase prefix, colon separator, uppercase section ID.
+    Examples: "cvc-oei:D5", "qm:8.3", "peralta:E4"
+
+    Severity scoring: high = -10 pts, medium = -5 pts, low = -2 pts from a base of 100. Floor at 0.
+
+    Status state machine: pending → staged → published | ignored | resolved
+  </scan_issue_schema>
+
+  <supabase_edge_function_endpoints>
+    Base URL: https://nhmvhwmvstexeivayrgy.supabase.co/functions/v1/make-server-74508696
+
+    <health>
+      GET /health — returns { status: "ok" }
+    </health>
+
+    <imported_courses>
+      POST /courses — save uploaded course with scan results
+      GET /courses — list all imported courses
+      GET /courses/:courseId — get single course
+      PUT /courses/:courseId — update course data
+      DELETE /courses/:courseId — delete imported course
+      POST /courses/:courseId/scan — trigger scan on imported course
+      POST /courses/:courseId/fix — apply fix to imported course content
+    </imported_courses>
+
+    <canvas_proxy>
+      POST /canvas/test — test Canvas connection (validates PAT)
+      POST /canvas/courses — fetch user's Canvas courses
+      POST /canvas/modules — fetch course modules with items
+      POST /canvas/assignments — fetch course assignments
+      POST /canvas/front-page — fetch course front page
+      POST /canvas/upcoming-assignments — fetch upcoming assignments
+      POST /canvas/announcements — fetch course announcements
+      POST /canvas/discussions — fetch course discussions
+      POST /canvas/quizzes — fetch course quizzes
+      POST /canvas/assignment — fetch single assignment by ID
+      POST /canvas/page — fetch single page by URL
+      POST /canvas/file — fetch file metadata and content
+      POST /canvas/discussion — fetch single discussion
+      POST /canvas/pages — fetch all pages in course
+      POST /canvas/update-page — PUT update to a Canvas page
+      POST /canvas/update-assignment — PUT update to a Canvas assignment
+      POST /canvas/update-discussion — PUT update to a Canvas discussion
+      POST /canvas/add-objectives-to-module — add objectives page to a module
+      POST /canvas/create-course — create new Canvas course
+      POST /canvas/create-announcement — create announcement in course
+      POST /canvas/create-discussion — create discussion in course
+      POST /canvas/append-to-syllabus — append content to course syllabus
+      POST /canvas/create-page-in-module — create page and add to module
+      POST /canvas/download-file — download file from Canvas
+    </canvas_proxy>
+
+    <imscc_import>
+      POST /canvas/upload-imscc-init — initialize IMSCC upload to Canvas
+      POST /canvas/migration-status — check IMSCC migration progress
+      POST /canvas/upload — upload file to Canvas
+    </imscc_import>
+
+    <ai_endpoints>
+      POST /generate-alt-text — AI alt text for images (GPT-4o Vision)
+      POST /generate-table-caption — AI caption for data tables
+      POST /generate-learning-objectives — AI learning objectives (Bloom's taxonomy)
+      POST /generate-link-text — AI descriptive link text replacement
+      POST /rewrite-content — AI content rewrite for dense paragraphs
+      POST /generate-template — AI course content template generation
+      POST /convert-pdf-to-html — convert uploaded PDF to accessible HTML
+      POST /convert-pdf-from-canvas — convert Canvas-hosted PDF to accessible HTML
+    </ai_endpoints>
+
+    <ai_course_tools>
+      POST /ai-organize-modules — AI-powered module organization suggestions
+      POST /apply-module-organization — apply AI module organization to Canvas
+      POST /ai/generate-objectives — alternative objectives generation endpoint
+    </ai_course_tools>
+  </supabase_edge_function_endpoints>
+
+  <core_features>
+    <canvas_connection>
+      - Modal dialog for entering Canvas domain and Personal Access Token
+      - Connection test validates token against Canvas API
+      - Token and domain persist in localStorage across sessions
+      - Courses load automatically after successful connection
+      - Multiple Canvas instances supported (user switches domain)
+    </canvas_connection>
+
+    <course_scanning>
+      - Scan all content types: pages, assignments, announcements, discussions, quizzes
+      - Fetch module structure for navigation depth analysis
+      - Five scanners run sequentially via courseScanner.ts orchestrator
+      - Live scan progress display (LiveScanView) shows per-item status
+      - Results cached in localStorage per course (keyed by courseId)
+      - "All Courses" aggregate view (courseId=0, excluded from cache writes)
+      - Re-scan available to refresh stale results
+      - Standards tags applied to every issue by standardsMapping.ts
+    </course_scanning>
+
+    <accessibility_scanning>
+      CVC-OEI Section D / WCAG 2.0 AA checks:
+
+      - D7 / WCAG 1.1.1: Missing alt text on images (detects missing or empty alt on non-decorative images)
+      - D1: Heading hierarchy violations (skipped levels, missing H1, bold-as-heading patterns)
+      - D4: Tables without th headers (checks first row for th presence)
+      - D4: Tables without caption element (checks for caption on data tables)
+      - D5 / WCAG 1.4.3: Color contrast below 4.5:1 ratio (inline style + data-mce-style detection)
+      - D5: Background color detection (walks ancestor chain: style, data-mce-style, bgcolor attributes)
+      - D3: Unclear link text ("click here", "read more", generic phrases)
+      - D3: Raw URL as link text (URLs over 50 characters used as display text)
+      - D12: Video without captions (YouTube cc_load_policy check — partial coverage)
+
+      Not yet implemented:
+      - D2: Lists created with manual dashes/asterisks instead of ul/ol markup
+      - D6: Color as sole information conveyor
+      - D13: Audio without transcript
+      - D16: Auto-playing audio/video (autoplay attribute check)
+      - D14: Flashing content (out of scope v1)
+      - D8: PDF reading order (out of scope v1)
+      - D9: Slide accessibility (out of scope v1)
+      - D10: Spreadsheet accessibility (out of scope v1)
+    </accessibility_scanning>
+
+    <rubric_scanning>
+      CVC-OEI Sections A–C checks:
+
+      - A1/A2: Learning objectives present in modules (detection exists; AI generation works)
+      - A5: Content organized into distinct units (module structure + depth check)
+      - A6: Page content chunked with headings (via accessibility heading scanner)
+      - B3: Instructor contact info present (pattern matching in cvcOeiRubricScanner)
+      - B4/B5: Student interaction opportunities (discussion detection)
+
+      Not yet implemented:
+      - A12: Course policies easy to find (no syllabus/policy detection)
+      - A13: Links to student support services
+      - A14: Technology support info
+      - C5: Assessment rubrics present (no rubric attachment detection)
+      - C7: Feedback timing policy
+    </rubric_scanning>
+
+    <quality_matters_scanning>
+      Quality Matters 7th Edition checks:
+
+      - Standards 2.1–2.5: Learning Objectives (partial — objective generation exists)
+      - Standards 8.1–8.7: Accessibility &amp; Usability (partial — WCAG checks cover 8.3, 8.4)
+
+      Not yet implemented:
+      - Standards 1.1–1.9: Course Overview
+      - Standards 3.1–3.6: Assessment Alignment
+      - Standards 4.1–4.5: Instructional Materials
+      - Standards 5.1–5.4: Learning Activities
+      - Standards 6.1–6.4: Course Technology
+      - Standards 7.1–7.4: Learner Support
+    </quality_matters_scanning>
+
+    <peralta_equity_scanning>
+      Peralta Online Equity Rubric v3.0:
+
+      - E3: UDL principles applied (partial — via usability scan)
+
+      Not yet implemented:
+      - E1: Mitigates digital divide / tech access
+      - E2: Student wellness + support services highlighted
+      - E4: Communications value diversity
+      - E5: Images reflect broad diversity
+      - E6: Human biases identified
+      - E7: Connections to students' lives and futures
+      - E8: Communications foster care and connection
+    </peralta_equity_scanning>
+
+    <fix_workflow>
+      Two-phase stage → review → publish workflow:
+
+      - Stage fix: Generate fixed HTML locally, preview without touching Canvas
+      - Before/After HTML preview: Side-by-side comparison in IssueDetailModal
+      - Publish fix: Confirmed fix sent to Canvas via Supabase proxy
+      - Undo published fix: Original content stored for revert
+      - Batch stage: Stage all auto-fixable issues at once
+      - Batch publish: Publish all staged fixes (partial — lacks per-item progress)
+
+      Per-issue-type fixes:
+      - Alt text: Manual entry or AI-generated (GPT-4o Vision)
+      - Heading hierarchy: Level reassignment or conversion to paragraph
+      - Table headers: td → th conversion in first row
+      - Table caption: Manual entry or AI-generated
+      - Color contrast: Inline color style override with WCAG-passing color
+      - Link text: Manual entry or AI-generated descriptive replacement
+      - Learning objectives: AI generation (Bloom's taxonomy) injected into module page
+
+      Not yet implemented:
+      - Dense paragraph AI rewrite (flagged but no AI suggestion in fix flow)
+      - Layout table semantic conversion (flagged but no purpose-selection step)
+      - AI broken link replacement (flagged but no replacement URL suggestion)
+    </fix_workflow>
+
+    <standards_filtering>
+      - Toggle CVC-OEI, Quality Matters, and Peralta standards on/off
+      - Filter applies globally across all views (issues list, scan panel, analytics)
+      - Filter state persists in App.tsx (enabledStandards array)
+      - Defaults to all three standards enabled
+    </standards_filtering>
+
+    <analytics>
+      - Overall compliance score display (weighted average across all issues)
+      - Per-rubric compliance breakdown (CVC-OEI, QM, Peralta percentages)
+        NOTE: Currently broken — shows 0% due to standardsTags format mismatch
+      - Severity distribution chart (high/medium/low issue counts)
+      - Score trend over time (UI exists but no persistent history storage)
+      - Statewide compliance metrics (UI exists but no real data source)
+    </analytics>
+
+    <audit_reports>
+      - Compliance report view (ComplianceReports.tsx)
+      - Standards compliance grid in report
+      - Critical issues list in report
+      - Leadership brief text generation
+      - PDF export (currently broken — does not produce valid download)
+    </audit_reports>
+
+    <imscc_import>
+      - Upload IMSCC course package file
+      - Parse package contents (imsccParser.ts + JSZip)
+      - Store parsed course in Supabase
+      - Scan imported course content
+      - Fix publishing back to Canvas from IMSCC source (partial — gaps remain)
+    </imscc_import>
+
+    <course_builders>
+      - Template builder interface (CourseBuilders.tsx)
+      - Predefined course templates (CourseTemplates.tsx)
+      - AI-generated content templates via Edge Function
+      - Syllabus Builder placeholder ("Coming Soon" in Builders tab)
+    </course_builders>
+
+    <onboarding>
+      - First-run walkthrough tour (OnboardingTour.tsx)
+      - Feature guide modal (FeatureGuideModal.tsx)
+    </onboarding>
+  </core_features>
+
+  <ui_layout>
+    <main_structure>
+      - Canvas-style left sidebar navigation (CanvasLayout.tsx)
+      - Main content area switches based on currentView state
+      - Right-side scan panel (ScanPanel.tsx) slides out over content
+      - Modal overlays for issue details, fixes, settings
+      - Responsive layout with collapsible sidebar
+    </main_structure>
+
+    <sidebar_left>
+      - SIMPLIFY logo and branding
+      - Navigation items: Dashboard, Courses, SIMPLIFY tool, Account
+      - Course dropdown selector in header area
+      - Canvas connection status indicator
+      - Standards filter toggle
+    </sidebar_left>
+
+    <main_content_area>
+      - SimplifyDashboard: Three tabs — Overview, Analytics, Builders
+      - Overview tab: Quick stats cards, scan button, recent issues
+      - Analytics tab: Compliance scores, severity charts, trend data
+      - Builders tab: Course templates, syllabus builder (coming soon)
+      - CanvasDashboard: Canvas homepage view
+      - CanvasCourses: Course browser list with CourseCard tiles
+      - CourseView: Full course content structure tree
+    </main_content_area>
+
+    <scan_panel_right>
+      - Slide-out drawer showing scan results
+      - Grouped by severity (high → medium → low)
+      - Click issue to open IssueDetailModal
+      - Batch stage and batch publish actions
+      - Standards filter applied
+    </scan_panel_right>
+
+    <modals>
+      - IssueDetailModal: Per-issue detail with fix options, Before/After preview
+        (~186KB — handles every fix type with category-based rendering branches)
+      - IssuesListModal: Paginated list of all issues with filter/sort
+      - CanvasConnectionModal: Token-based Canvas login
+      - CourseSelectionModal: Course picker
+      - StandardsModal: Rubric filter selection
+      - FixPreviewModal: Before/After HTML comparison
+      - IMSCCImportModal: File upload + import flow
+      - ObjectivesEditorModal: Learning objectives editing
+      - ContentPreviewModal: Content preview
+      - FixItModal: Quick fix application
+    </modals>
+  </ui_layout>
+
+  <design_system>
+    <color_palette>
+      - Primary brand: Blue accent (Canvas-inspired)
+      - Background: White (#ffffff)
+      - Surface cards: White with border-[#d2d2d7] rounded-[10px]
+      - Text primary: Near black (#1d1d1f)
+      - Text secondary: Gray (#6e6e73)
+      - Severity high: Red
+      - Severity medium: Orange/amber
+      - Severity low: Yellow
+      - Success/published: Green
+      - Bloom's taxonomy badges: Tiny colored pills (text-[7px], opacity 0.6)
+    </color_palette>
+
+    <typography>
+      - System font stack via Tailwind defaults
+      - Headings: font-semibold
+      - Body: font-normal
+      - Issue numbers: Black (#1d1d1f), not blue
+    </typography>
+
+    <card_style>
+      Established pattern for content cards (AI suggestions, writing tips, examples):
+      - Container: border-[#d2d2d7] rounded-[10px] bg-white
+      - Heading pulled outside card container with icon (e.g., wand icon for AI)
+      - Clean padding, no scroll cutoff
+    </card_style>
+
+    <modal_patterns>
+      - Objectives What's Flagged: Design 4 — side-by-side header (module left, target page right)
+      - Outcomes grouped by source with Style A labels (plain gray text, no icons)
+      - AI Suggestions: Heading outside container, content in card
+      - Publish confirmation: Modal with "Don't show this again" checkbox (localStorage persist)
+    </modal_patterns>
+  </design_system>
+
+  <component_inventory>
+    <production_components>
+      App.tsx — Root component, all global state and event handlers
+      SimplifyDashboard.tsx — Main tab shell (Overview / Analytics / Builders)
+      ScanPanel.tsx — Slide-out scan results drawer
+      IssueDetailModal.tsx — Per-issue detail and fix options (~186KB)
+      IssuesListModal.tsx — Full paginated issues list
+      LiveScanView.tsx — Live scanning progress display
+      Analytics.tsx — Standards compliance dashboard
+      ComplianceReports.tsx — Audit report + PDF export
+      CanvasConnectionModal.tsx — Token-based Canvas login
+      CanvasLayout.tsx — Left sidebar navigation
+      CanvasDashboard.tsx — Canvas homepage view
+      CanvasCourses.tsx — Course browser list
+      CanvasCoursesPanel.tsx — Course panel variant
+      CourseView.tsx — Full course content tree
+      CourseCard.tsx — Course tile component
+      CourseDropdown.tsx — Course selector in header
+      CourseSelectionModal.tsx — Course picker modal
+      CourseBuilders.tsx — Template builder interface
+      CourseTemplates.tsx — Predefined templates
+      CourseContent.tsx — Course content display
+      CourseViewer.tsx — Course viewer variant
+      IMSCCImportModal.tsx — Upload + import IMSCC file
+      ImportCourseModal.tsx — Course import modal
+      AccountPanel.tsx — Account/settings side panel
+      Account.tsx — Account page
+      OnboardingTour.tsx — First-run walkthrough
+      FeatureGuideModal.tsx — Feature guide overlay
+      StandardsModal.tsx — Rubric filter selection
+      CanvasSettings.tsx — Canvas domain + token settings
+      QuickStats.tsx — Summary stat cards
+      UsabilityScorecard.tsx — Ring chart for usability score
+      CompactOverviewTab.tsx — Compact overview layout
+      CompactAnalyticsTab.tsx — Compact analytics layout
+      CompactBuildersTab.tsx — Compact builders layout
+      Sidebar.tsx — Sidebar component
+      SecondaryNav.tsx — Secondary navigation
+      ModulesView.tsx — Module structure view
+      FixPreviewModal.tsx — Before/After HTML comparison
+      FixItModal.tsx — Quick fix modal
+      InContextFixModal.tsx — In-context fix overlay
+      ContentPreviewModal.tsx — Content preview modal
+      ObjectivesEditorModal.tsx — Learning objectives editor
+      AIObjectivesGenerator.tsx — AI objectives generation UI
+      PageViewer.tsx — Page content viewer
+      AssignmentViewer.tsx — Assignment content viewer
+      DiscussionViewer.tsx — Discussion content viewer
+      FileViewer.tsx — File content viewer
+      FilesView.tsx — Files listing view
+      UnifiedCalendar.tsx — Calendar view
+      CanvasCommons.tsx — Canvas Commons integration
+      CanvasConnectModal.tsx — Canvas connection modal variant
+      CanvasConnectionPrompt.tsx — Connection prompt
+      CourseUploadModal.tsx — Course upload dialog
+      Dashboard.tsx — Dashboard component
+      DashboardContent.tsx — Dashboard content area
+      Courses.tsx — Courses page
+      TemplatePreview.tsx — Template preview
+      TemplatePreviewModal.tsx — Template preview modal
+      StatewideComplianceDrawer.tsx — Statewide compliance drawer
+      ImprovedIssueModal.tsx — Improved issue modal variant
+    </production_components>
+
+    <design_demo_components>
+      These exist from the design exploration process and are NOT rendered in production:
+      ButtonDesignVariations.tsx — Design demo only
+      AnalyticsVariations.tsx — Design demo only
+      LoginHeaderVariants.tsx — Design demo only
+      ModalDesignComparison.tsx — Design demo only
+      ModalSizeComparison.tsx — Design demo only
+      RubricTagsDemo.tsx — Design demo only
+      StandardsDesignOptions.tsx — Design demo only
+      UsabilityScorecardOptions.tsx — Design demo only
+      UsabilityScorecardRingOptions.tsx — Design demo only
+      CourseBuilders.PRESERVED.tsx — Backup, superseded by CourseBuilders.tsx
+    </design_demo_components>
+  </component_inventory>
+
+  <utility_modules>
+    <scan_engine>
+      courseScanner.ts — Scan orchestrator (calls all scanners sequentially)
+      scanners/accessibilityScanner.ts — WCAG 2.0 AA checks
+      scanners/usabilityScanner.ts — CVC-OEI usability checks
+      scanners/cvcOeiRubricScanner.ts — Full CVC-OEI rubric (~80KB)
+      scanners/designScanner.ts — Visual consistency checks
+      scanners/linkDetector.ts — Link quality and broken link detection
+      standards/standardsMapping.ts — Maps issue types to rubric standard tags
+      standards/qualityMatters.ts — QM 7th Edition standard definitions
+      contentScanner.ts — Content-level issue detection
+    </scan_engine>
+
+    <fix_engine>
+      fixStaging.ts — Two-phase stage → publish workflow
+      canvasFixer.ts — Applies fixes to Canvas via proxy (~63KB)
+      imsccFixer.ts — Fixes for IMSCC-sourced issues
+      supabaseFixer.ts — Applies fixes to Supabase-stored courses
+    </fix_engine>
+
+    <ai_services>
+      aiFixerService.ts — Central AI suggestion service (caching + error handling)
+      aiObjectivesGenerator.ts — Learning objectives AI generation
+    </ai_services>
+
+    <utilities>
+      canvasAPI.ts — Canvas LMS API wrapper (all calls proxied through Supabase)
+      api.ts — Supabase client for imported courses
+      colorContrast.ts — WCAG 2.1 contrast ratio calculation
+      htmlSanitizer.ts — HTML sanitization for safe display
+      imsccParser.ts — IMSCC course package parser
+      manifestParser.ts — Manifest file parser
+      courseTemplates.ts — Predefined course template definitions
+    </utilities>
+  </utility_modules>
+
+  <known_bugs>
+    <bug id="BUG-001" severity="high">
+      <title>Analytics shows 0% for CVC-OEI, QM, Peralta</title>
+      <area>Analytics</area>
+      <description>Per-standard compliance percentages always show 0% because standardsTags format
+        from standardsMapping.ts doesn't match what Analytics.tsx expects.</description>
+      <root_cause>standardsMapping.ts generates tags like 'cvc-oei:D7' but analytics may check
+        a different format or prefix.</root_cause>
+    </bug>
+
+    <bug id="BUG-002" severity="high">
+      <title>PDF export does not produce valid download</title>
+      <area>Audit Report</area>
+      <description>The PDF export button in ComplianceReports.tsx does not generate a downloadable PDF.
+        Library may not be installed or async rendering not handled correctly.</description>
+    </bug>
+
+    <bug id="BUG-003" severity="medium">
+      <title>Color contrast preview shows 1:1 for class-based backgrounds</title>
+      <area>Scanner</area>
+      <description>Inline styles detected correctly, but CSS class-based background colors are not
+        accessible from DOMParser — shows 1:1 ratio instead of actual contrast.</description>
+    </bug>
+
+    <bug id="BUG-004" severity="low">
+      <title>All Courses view includes stale data</title>
+      <area>Scanning</area>
+      <description>Aggregate view can include outdated per-course data with no invalidation strategy.</description>
+    </bug>
+  </known_bugs>
+
+  <invariants>
+    These rules MUST NOT be violated. Any feature implementation must preserve these:
+
+    1. STAGE → REVIEW → PUBLISH WORKFLOW: Fixes must never be written to Canvas without explicit
+       instructor confirmation. Never add auto-publish shortcuts. Every fix goes through fixStaging.ts
+       before the user explicitly publishes.
+
+    2. AI NEVER PUBLISHES WITHOUT CONFIRMATION: All AI-generated content (alt text, captions,
+       objectives, link text, rewrites) must go through edit-and-confirm in IssueDetailModal.
+
+    3. SUPABASE PROXY FOR ALL CANVAS API CALLS: Canvas does not allow direct browser requests (CORS).
+       Never call Canvas API directly from frontend code.
+
+    4. STANDARDS TAGS ON EVERY SCAN ISSUE: Every issue from any scanner must include
+       standardsTags: string[]. Format: 'cvc-oei:D7', 'qm:8.3', 'peralta:E3' (lowercase prefix,
+       colon, uppercase section ID).
+
+    5. COLOR VALUES ON CONTRAST ISSUES: textColor and backgroundColor (hex) must be present on
+       contrast issues. IssueDetailModal reads these directly.
+
+    6. COURSEID GUARD FOR LOCALSTORAGE: allCourseScanResults cache must never write with courseId=0.
+       The guard in App.tsx must be preserved.
+
+    7. SCANNERS ARE PURE FUNCTIONS: Each scanner takes HTML string, returns ScanIssue[].
+       No side effects, no API calls inside scanners.
+
+    8. AI CALLS THROUGH SERVICE LAYER: All AI requests go through aiFixerService.ts — never add
+       direct fetch calls to AI endpoints in components.
+
+    9. STATUS STATE MACHINE: ScanIssue.status follows: pending → staged → published | ignored | resolved.
+       Do not introduce additional status values.
+
+    10. SKIPFETCH GUARD IN ISSUEDETAILMODAL: Issues with contentType 'module' or 'course',
+        contentId 'syllabus', or categories 'policies'/'objectives' must set skipFetch=true
+        before calling loadContent().
+  </invariants>
+
+  <implementation_phases>
+    <phase name="Priority 1 — Critical Bug Fixes">
+      <description>Fix issues that break core user experience</description>
+      <tasks>
+        - Fix Analytics 0% bug (standardsTags format mismatch between scanners and Analytics.tsx)
+        - Fix Audit Report PDF export (library/async issue in ComplianceReports.tsx)
+      </tasks>
+    </phase>
+
+    <phase name="Priority 2 — Incomplete Core Features">
+      <description>Complete partially-built features that are visible to users</description>
+      <tasks>
+        - Layout table semantic conversion flow (purpose-selection step in fix modal)
+        - Dense paragraph AI rewrite (wire aiFixerService for large-text-block fix suggestions)
+        - AI broken link replacement (suggest replacement URL and link text)
+        - Batch publish progress feedback (per-item success/failure status)
+      </tasks>
+    </phase>
+
+    <phase name="Priority 3 — Missing Scanner Coverage">
+      <description>Add detection for standards not yet covered</description>
+      <tasks>
+        - CVC-OEI D2: Manual list formatting detection (dashes/asterisks in p tags)
+        - CVC-OEI D6: Color as sole information conveyor (manual-check prompt)
+        - CVC-OEI D16: Auto-play media detection (autoplay attribute check)
+        - CVC-OEI A12/A13/A14: Course policy and support link detection
+      </tasks>
+    </phase>
+
+    <phase name="Priority 4 — Polish and UX">
+      <description>Improve user experience and data persistence</description>
+      <tasks>
+        - Score trend history persistence (localStorage or Supabase)
+        - Scan error handling and retry (visible error state for partial scan failures)
+        - Modal UI consistency across all flag types
+      </tasks>
+    </phase>
+
+    <phase name="Future — Major Features">
+      <description>Larger features for future consideration</description>
+      <tasks>
+        - LTI 1.3 integration (institutional authentication)
+        - Syllabus Builder (backend implementation)
+        - Additional QM standards coverage (1.x, 3.x–7.x)
+        - Peralta E1–E8 implementation (feasibility analysis needed)
+        - PDF accessibility scanner (currently disabled due to 502 crashes)
+      </tasks>
+    </phase>
+  </implementation_phases>
+
+  <success_criteria>
+    <scanning_coverage>
+      - Greater than 80% of CVC-OEI Section D failures caught by scanners
+      - Zero false positives on high-severity issues
+      - Scan completes within 60 seconds for courses with up to 50 content items
+    </scanning_coverage>
+
+    <fix_accuracy>
+      - Greater than 70% fix acceptance rate (fixes applied without manual editing)
+      - AI-generated alt text rated "acceptable" by instructors in more than 80% of cases
+      - Zero data loss — original content always recoverable via undo
+    </fix_accuracy>
+
+    <analytics_accuracy>
+      - Per-standard compliance percentages match manual rubric evaluation within 10%
+      - Score changes reflected immediately after fix publish
+      - Historical trend data available for at least last 10 scans
+    </analytics_accuracy>
+
+    <user_experience>
+      - Instructor can complete full scan → fix → publish cycle in under 5 minutes
+      - No silent failures — all errors surface visible feedback with retry options
+      - Mobile-responsive layout functional on iPad (primary instructor device)
+    </user_experience>
+
+    <technical_quality>
+      - npm run build succeeds with zero TypeScript errors
+      - No console errors during normal scan → fix → publish workflow
+      - localStorage data survives page refresh and browser restart
+      - Supabase Edge Function responds within 5 seconds for all Canvas proxy calls
+    </technical_quality>
+  </success_criteria>
+
+  <decisions_needed>
+    Before implementing remaining features, these decisions should be made:
+
+    1. PDF export library: Confirm jsPDF, html2canvas, or alternative approach
+    2. Score trend storage: Supabase (requires auth) vs localStorage (device-local only)
+    3. Peralta E4–E8 feasibility: Automated detection vs manual-check prompts in report
+    4. LTI 1.3 timeline: When does institutional auth become a priority?
+    5. Disabled scanner flags: Which of the 12 tabled features should be re-enabled?
+  </decisions_needed>
+</project_specification>

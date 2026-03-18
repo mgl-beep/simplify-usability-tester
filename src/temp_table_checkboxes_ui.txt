@@ -1,0 +1,131 @@
+/* NEW TABLE PURPOSE SELECTION UI - MULTI-SELECT CHECKBOXES */
+{/* Layout Table Purpose Selection with CHECKBOXES */}
+{!tablePurposes || tablePurposes.length === 0 ? (
+  /* Step 1: Ask what they're using the table for (MULTI-SELECT) */
+  <div className="px-4 py-4 bg-[#fff9e6]/60 border-2 border-t-0 border-[#ff9500]/20 rounded-b-[8px] mb-3">
+    <div className="flex items-start gap-3 mb-4">
+      <AlertTriangle className="w-5 h-5 text-[#ff9500] flex-shrink-0 mt-0.5" />
+      <div>
+        <div className="text-[14px] font-semibold text-[#1d1d1f] mb-1.5">
+          Tables should not be used for layout
+        </div>
+        <p className="text-[13px] text-[#1d1d1f] leading-relaxed">
+          Layout tables create accessibility barriers for screen reader users and violate WCAG guidelines.
+        </p>
+      </div>
+    </div>
+    
+    <div className="border-t border-[#ff9500]/15 pt-4 mt-3">
+      <div className="text-[13px] font-semibold text-[#1d1d1f] mb-3">What are you using this table for?</div>
+      <div className="space-y-2">
+        {/* List of items checkbox */}
+        <label className="flex items-start gap-3 p-3 rounded-[8px] bg-white hover:bg-[#f5f5f7] border border-[#d2d2d7] cursor-pointer transition-colors">
+          <input
+            type="checkbox"
+            checked={tablePurposes.includes('list')}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setTablePurposes([...tablePurposes, 'list']);
+              } else {
+                setTablePurposes(tablePurposes.filter(p => p !== 'list'));
+              }
+            }}
+            className="mt-0.5 w-4 h-4 rounded border-[#d2d2d7] text-[#0071e3] focus:ring-[#0071e3] focus:ring-offset-0"
+          />
+          <div className="flex-1">
+            <div className="text-[13px] font-medium text-[#1d1d1f]">📋 List of items</div>
+          </div>
+        </label>
+
+        {/* Links/Navigation checkbox */}
+        <label className="flex items-start gap-3 p-3 rounded-[8px] bg-white hover:bg-[#f5f5f7] border border-[#d2d2d7] cursor-pointer transition-colors">
+          <input
+            type="checkbox"
+            checked={tablePurposes.includes('links')}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setTablePurposes([...tablePurposes, 'links']);
+              } else {
+                setTablePurposes(tablePurposes.filter(p => p !== 'links'));
+              }
+            }}
+            className="mt-0.5 w-4 h-4 rounded border-[#d2d2d7] text-[#0071e3] focus:ring-[#0071e3] focus:ring-offset-0"
+          />
+          <div className="flex-1">
+            <div className="text-[13px] font-medium text-[#1d1d1f]">🔗 Links/Navigation</div>
+          </div>
+        </label>
+
+        {/* Image gallery checkbox */}
+        <label className="flex items-start gap-3 p-3 rounded-[8px] bg-white hover:bg-[#f5f5f7] border border-[#d2d2d7] cursor-pointer transition-colors">
+          <input
+            type="checkbox"
+            checked={tablePurposes.includes('gallery')}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setTablePurposes([...tablePurposes, 'gallery']);
+              } else {
+                setTablePurposes(tablePurposes.filter(p => p !== 'gallery'));
+              }
+            }}
+            className="mt-0.5 w-4 h-4 rounded border-[#d2d2d7] text-[#0071e3] focus:ring-[#0071e3] focus:ring-offset-0"
+          />
+          <div className="flex-1">
+            <div className="text-[13px] font-medium text-[#1d1d1f]">🖼️ Image gallery</div>
+          </div>
+        </label>
+
+        {/* Actually data checkbox */}
+        <label className="flex items-start gap-3 p-3 rounded-[8px] bg-white hover:bg-[#f5f5f7] border border-[#d2d2d7] cursor-pointer transition-colors">
+          <input
+            type="checkbox"
+            checked={tablePurposes.includes('data')}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setTablePurposes([...tablePurposes, 'data']);
+              } else {
+                setTablePurposes(tablePurposes.filter(p => p !== 'data'));
+              }
+            }}
+            className="mt-0.5 w-4 h-4 rounded border-[#d2d2d7] text-[#0071e3] focus:ring-[#0071e3] focus:ring-offset-0"
+          />
+          <div className="flex-1">
+            <div className="text-[13px] font-medium text-[#1d1d1f]">📊 Actually data</div>
+          </div>
+        </label>
+      </div>
+    </div>
+    
+    <div className="mt-4 flex gap-2">
+      <button
+        onClick={() => {
+          setShowTableDataPrompt(true);
+          setIsDataTable(null);
+          setTablePurposes([]);
+        }}
+        className="px-4 h-[40px] rounded-[10px] border border-[#d2d2d7] text-[#1d1d1f] hover:bg-[#f5f5f7] text-[14px] font-medium transition-colors"
+      >
+        ← Go Back
+      </button>
+      {tablePurposes.length > 0 && (
+        <button
+          onClick={convertLayoutTable}
+          disabled={isGenerating}
+          className="flex-1 h-[40px] rounded-[10px] bg-[#0071e3] hover:bg-[#0077ed] disabled:bg-[#d2d2d7] text-white text-[14px] font-semibold transition-colors flex items-center justify-center gap-2"
+        >
+          {isGenerating ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Converting...
+            </>
+          ) : (
+            <>
+              <Check className="w-4 h-4" />
+              Fix Now
+            </>
+          )}
+        </button>
+      )}
+    </div>
+  </div>
+) : null}

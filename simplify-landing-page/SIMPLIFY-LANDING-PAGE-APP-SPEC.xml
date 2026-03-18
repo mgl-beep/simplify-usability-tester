@@ -1,0 +1,1098 @@
+<project_specification>
+  <project_name>SIMPLIFY — Marketing Landing Page</project_name>
+
+  <overview>
+    Build a high-converting marketing landing page for SIMPLIFY, an EdTech product by Simplify Inc.
+    SIMPLIFY is a Canvas LTI plug-in that scans entire courses for accessibility and usability issues,
+    maps findings to the rubrics faculty already use (CVC-OEI, Quality Matters, Peralta Equity), and
+    offers one-click automated fixes. The landing page targets three audiences: faculty/instructors
+    (primary buyers), instructional designers/accessibility coordinators (internal champions), and
+    higher-ed administrators (budget holders). The page must communicate the product's value clearly,
+    differentiate from competitors (UDOIT, Ally, Pope Tech), and drive demo requests and pilot signups.
+    The design should feel modern, trustworthy, and education-forward — not corporate SaaS generic.
+  </overview>
+
+  <technology_stack>
+    <frontend>
+      <framework>Next.js 14+ (App Router, static export capable)</framework>
+      <styling>Tailwind CSS 3.4+</styling>
+      <animations>Framer Motion for scroll-triggered animations and micro-interactions</animations>
+      <icons>Lucide React icon library</icons>
+      <fonts>Google Fonts — Inter (body), Plus Jakarta Sans (headings)</fonts>
+      <components>Radix UI primitives for accessible modals, tabs, accordions</components>
+      <forms>React Hook Form + Zod validation for lead capture</forms>
+      <analytics>Google Tag Manager container ready, conversion tracking pixels</analytics>
+      <port>Launch on port 3000</port>
+    </frontend>
+    <backend>
+      <form_handling>Next.js API routes or serverless function for form submissions</form_handling>
+      <email>Resend or SendGrid integration for demo request notifications</email>
+      <crm>Webhook to HubSpot/Salesforce for lead capture (configurable)</crm>
+    </backend>
+    <deployment>
+      <platform>Vercel (primary) or Netlify</platform>
+      <domain>simplifyedtech.com (placeholder)</domain>
+      <ssl>Automatic via platform</ssl>
+    </deployment>
+  </technology_stack>
+
+  <prerequisites>
+    <environment_setup>
+      - Node.js 18+ installed
+      - pnpm or npm for package management
+      - Environment variables: RESEND_API_KEY, CRM_WEBHOOK_URL, GTM_ID (all optional for dev)
+      - All images use next/image with placeholder blur for performance
+    </environment_setup>
+  </prerequisites>
+
+  <brand_identity>
+    <company_name>Simplify</company_name>
+    <product_name>SIMPLIFY</product_name>
+    <tagline>One scan. Every rubric. Courses that work for everyone.</tagline>
+    <sub_tagline>The Canvas plug-in that cleans up your courses — accessibility, usability, and equity in one place.</sub_tagline>
+
+    <voice_and_tone>
+      - Approachable and supportive, never punitive or compliance-heavy
+      - Speaks to educators as peers, not as IT departments
+      - Uses rubric language faculty already know (CVC-OEI, QM, POCR) — not raw WCAG jargon
+      - Celebrates progress ("Your course improved 15 points") over shaming gaps
+      - Confident but not arrogant — acknowledges the real challenges faculty face
+    </voice_and_tone>
+
+    <color_palette>
+      <primary>
+        <color name="simplify-blue" hex="#2563EB" usage="Primary CTAs, links, active states" />
+        <color name="simplify-blue-dark" hex="#1E40AF" usage="Hover states, emphasis" />
+        <color name="simplify-blue-light" hex="#DBEAFE" usage="Backgrounds, badges, highlights" />
+      </primary>
+      <secondary>
+        <color name="simplify-green" hex="#059669" usage="Success states, score improvements, pass indicators" />
+        <color name="simplify-green-light" hex="#D1FAE5" usage="Success backgrounds" />
+        <color name="simplify-amber" hex="#D97706" usage="Warning states, partial-pass indicators" />
+        <color name="simplify-amber-light" hex="#FEF3C7" usage="Warning backgrounds" />
+        <color name="simplify-red" hex="#DC2626" usage="Critical issues, fail indicators" />
+        <color name="simplify-red-light" hex="#FEE2E2" usage="Error backgrounds" />
+      </secondary>
+      <neutral>
+        <color name="slate-900" hex="#0F172A" usage="Headings, primary text" />
+        <color name="slate-700" hex="#334155" usage="Body text" />
+        <color name="slate-500" hex="#64748B" usage="Secondary text, captions" />
+        <color name="slate-200" hex="#E2E8F0" usage="Borders, dividers" />
+        <color name="slate-50" hex="#F8FAFC" usage="Page background, alternating sections" />
+        <color name="white" hex="#FFFFFF" usage="Card backgrounds, primary surfaces" />
+      </neutral>
+    </color_palette>
+
+    <typography>
+      <heading_font>Plus Jakarta Sans — weights 600 (semibold), 700 (bold), 800 (extrabold)</heading_font>
+      <body_font>Inter — weights 400 (regular), 500 (medium), 600 (semibold)</body_font>
+      <scale>
+        - Hero H1: 4xl/5xl (36-48px), extrabold, tight tracking
+        - Section H2: 3xl (30px), bold
+        - Card H3: xl (20px), semibold
+        - Body: base (16px), regular, relaxed leading (1.75)
+        - Small: sm (14px), medium, for labels and captions
+        - Code/technical: JetBrains Mono for any code snippets shown in product screenshots
+      </scale>
+    </typography>
+
+    <imagery_style>
+      - Product screenshots showing the SIMPLIFY dashboard UI (can be mockups/illustrations)
+      - Diverse faculty and students in authentic higher-ed settings (not stock-photo corporate)
+      - Abstract geometric patterns using the blue palette for section backgrounds
+      - Iconography: line-style icons from Lucide, consistent 24px stroke
+      - Illustrations: flat/semi-flat style with the blue/green/amber palette
+      - NO generic stock photos of people staring at laptops
+    </imagery_style>
+  </brand_identity>
+
+  <page_sections>
+    <section id="nav" name="Navigation Bar">
+      <description>
+        Fixed top navigation bar with transparency that becomes solid on scroll.
+      </description>
+      <elements>
+        - Simplify logo (left) — text wordmark "SIMPLIFY" in Plus Jakarta Sans extrabold
+        - Nav links (center): Features, How It Works, Rubrics, Pricing, About
+        - CTA buttons (right): "Watch Demo" (ghost/outline), "Request Pilot" (primary filled)
+        - Mobile: hamburger menu with slide-out drawer
+        - Scroll behavior: transparent bg at top, white bg with subtle shadow after 50px scroll
+      </elements>
+    </section>
+
+    <section id="hero" name="Hero Section">
+      <description>
+        Full-viewport hero with the core value proposition. This is the most important section —
+        it must immediately communicate WHAT SIMPLIFY does, WHO it's for, and WHY they should care.
+      </description>
+      <layout>Split layout — left text (60%), right product visual (40%)</layout>
+      <content>
+        <eyebrow>Canvas LTI Plug-in for Higher Education</eyebrow>
+        <headline>Stop juggling accessibility tools. Start fixing your courses.</headline>
+        <subheadline>
+          SIMPLIFY scans your entire Canvas course against the rubrics you already use —
+          CVC-OEI, Quality Matters, and Peralta Equity — then fixes issues with one click.
+        </subheadline>
+        <cta_primary>Request a Pilot → (leads to demo form)</cta_primary>
+        <cta_secondary>See How It Works ↓ (smooth scroll to How It Works)</cta_secondary>
+        <social_proof_bar>
+          "Trusted by faculty at [X] California Community Colleges" with small institution logos
+          (use placeholder logos for now — gray rounded rectangles)
+        </social_proof_bar>
+      </content>
+      <visual>
+        Animated product mockup showing the SIMPLIFY scan dashboard:
+        - A browser frame containing the scan results UI
+        - Animated score gauge going from 0 to 72/100
+        - Severity badges popping in (3 Critical, 12 Serious, 24 Moderate, 8 Minor)
+        - Rubric section bars filling in with progress
+        - Subtle floating elements: checkmarks, accessibility icons
+        Use CSS/SVG animation — not a video — for fast load and engagement.
+      </visual>
+      <background>
+        Subtle gradient: white to slate-50. Optional: very faint grid/dot pattern.
+      </background>
+    </section>
+
+    <section id="problem" name="Problem Statement / Pain Points">
+      <description>
+        Empathy-first section that names the exact frustrations faculty face. Uses the "problem →
+        agitation → solution" framework. Three columns, each representing a pain point.
+      </description>
+      <layout>Section heading + 3-column card grid</layout>
+      <content>
+        <section_eyebrow>The Problem</section_eyebrow>
+        <section_headline>Your courses deserve better than a patchwork of tools.</section_headline>
+        <section_description>
+          Faculty shouldn't need four different tools, three browser tabs, and a rubric
+          spreadsheet just to make their courses accessible.
+        </section_description>
+        <pain_point id="1">
+          <icon>Layers (overlapping tools)</icon>
+          <title>Tool Overload</title>
+          <description>
+            UDOIT for HTML. Ally for documents. Pope Tech in the editor. The built-in checker
+            for basics. You're running four tools that don't talk to each other.
+          </description>
+        </pain_point>
+        <pain_point id="2">
+          <icon>Languages (translation/disconnect)</icon>
+          <title>Rubric Disconnect</title>
+          <description>
+            Your POCR reviewer says "Section D, Element 12." Your accessibility tool says
+            "WCAG 2.1 SC 1.3.1." You're left playing translator between two worlds.
+          </description>
+        </pain_point>
+        <pain_point id="3">
+          <icon>MousePointerClick (manual work)</icon>
+          <title>Flag Without Fix</title>
+          <description>
+            Most tools tell you what's wrong — then leave you to fix it manually, page by page,
+            image by image, table by table. Who has time for that?
+          </description>
+        </pain_point>
+      </content>
+    </section>
+
+    <section id="solution" name="Solution Overview / Product Introduction">
+      <description>
+        Transition section that introduces SIMPLIFY as the answer to the problems above.
+        Big visual impact — full-width product screenshot with overlaid feature callouts.
+      </description>
+      <layout>Centered text block above a large product screenshot/mockup</layout>
+      <content>
+        <section_eyebrow>The Solution</section_eyebrow>
+        <section_headline>One scan. Every rubric. One-click fixes.</section_headline>
+        <section_description>
+          SIMPLIFY replaces your patchwork of tools with a single Canvas plug-in that scans your
+          entire course, reports issues in the rubric language you already use, and fixes the most
+          common problems automatically.
+        </section_description>
+        <product_screenshot>
+          Large, detailed mockup of the SIMPLIFY dashboard showing:
+          - Overall score (72/100) with progress ring
+          - Severity breakdown cards (Critical: 3, Serious: 12, Moderate: 24, Minor: 8)
+          - Rubric section breakdown (A: Content 80%, B: Interaction 60%, C: Assessment 75%, D: Accessibility 65%)
+          - "Fix All Auto-Fixable (18)" button highlighted
+          - "Export Report" and "Schedule Rescan" secondary buttons
+          Annotated with callout labels pointing to key features.
+        </product_screenshot>
+      </content>
+      <background>slate-50 background with subtle gradient</background>
+    </section>
+
+    <section id="features" name="Core Features Deep Dive">
+      <description>
+        Detailed feature showcase. Uses alternating left-right layout (feature text + visual) for
+        each of the four core capabilities. Each feature gets its own visual treatment.
+      </description>
+      <layout>Alternating rows — odd rows: text left / visual right; even rows: visual left / text right</layout>
+      <content>
+        <feature id="1">
+          <icon>ScanSearch</icon>
+          <eyebrow>Course Scanner</eyebrow>
+          <title>Full-course scan in seconds</title>
+          <description>
+            SIMPLIFY scans every page, assignment, discussion, quiz, syllabus, and uploaded
+            document in your course. Not just the page you're editing — everything, all at once.
+          </description>
+          <bullets>
+            - WCAG 2.1 AA compliance checks on all HTML content
+            - PDF, DOCX, and PPTX document accessibility analysis
+            - Broken link detection across your entire course
+            - Course structure validation (modules, navigation, welcome page)
+          </bullets>
+          <visual>
+            Mockup showing a scan in progress — progress bar with content type icons
+            (pages, assignments, files) being checked off as the scan proceeds.
+          </visual>
+        </feature>
+
+        <feature id="2">
+          <icon>BookOpen</icon>
+          <eyebrow>Rubric-Aligned Reports</eyebrow>
+          <title>Reports that speak your rubric's language</title>
+          <description>
+            Stop translating WCAG codes into rubric elements. SIMPLIFY maps every issue directly
+            to the CVC-OEI, Quality Matters, or Peralta rubric standards your institution uses.
+          </description>
+          <bullets>
+            - Choose your rubric: CVC-OEI, QM, Peralta, or all three
+            - Issues grouped by rubric section (not WCAG success criteria)
+            - Element-level scoring: Aligned / Partially Aligned / Not Aligned
+            - Export PDF reports ready for POCR or QM submission
+          </bullets>
+          <visual>
+            Mockup of the rubric-aligned report view showing CVC-OEI sections A-D with
+            element-level pass/fail indicators and a "Download PDF" button.
+          </visual>
+        </feature>
+
+        <feature id="3">
+          <icon>Wand2</icon>
+          <eyebrow>One-Click Fixes</eyebrow>
+          <title>Don't just find problems — fix them</title>
+          <description>
+            For the most common accessibility issues, SIMPLIFY offers automated fixes you can
+            preview, edit, and apply without ever leaving the tool. Bulk operations let you
+            fix entire categories at once.
+          </description>
+          <bullets>
+            - AI-generated alt text suggestions (editable before applying)
+            - Heading hierarchy repair with live preview
+            - Color contrast fixes with compliant alternatives
+            - Table header insertion and link text improvements
+            - "Fix All" for batch operations — with full undo/rollback
+          </bullets>
+          <visual>
+            Mockup of the fix interface: image with missing alt text, AI-suggested description,
+            Edit/Apply/Skip buttons, and a before/after preview toggle.
+          </visual>
+        </feature>
+
+        <feature id="4">
+          <icon>BarChart3</icon>
+          <eyebrow>Institutional Dashboard</eyebrow>
+          <title>See the big picture across your institution</title>
+          <description>
+            Administrators and instructional designers get aggregate views across departments,
+            divisions, and the entire institution. Track compliance trends across terms and
+            prioritize support where it's needed most.
+          </description>
+          <bullets>
+            - Department and division-level compliance aggregation
+            - Term-over-term trend reporting (Fall → Spring → Summer)
+            - Faculty support queue for instructional designers
+            - Benchmark targets with progress tracking
+            - Role-based access — aggregate data for admins, course details for instructors
+          </bullets>
+          <visual>
+            Mockup of the admin dashboard: bar chart showing department compliance percentages,
+            trend line across terms, and a top-10 "needs attention" course list.
+          </visual>
+        </feature>
+      </content>
+    </section>
+
+    <section id="how-it-works" name="How It Works (3-Step Process)">
+      <description>
+        Simple 3-step process strip that shows how quick and easy it is to use SIMPLIFY.
+        Reduces cognitive load and demonstrates low friction.
+      </description>
+      <layout>Horizontal 3-column with numbered steps, connected by arrows/lines</layout>
+      <content>
+        <section_eyebrow>How It Works</section_eyebrow>
+        <section_headline>Three steps to a better course.</section_headline>
+        <step number="1">
+          <icon>MousePointerClick</icon>
+          <title>Scan</title>
+          <description>
+            Launch SIMPLIFY from your Canvas course navigation. Select your rubric(s) and
+            click "Scan Course." We'll check everything in seconds.
+          </description>
+        </step>
+        <step number="2">
+          <icon>FileSearch</icon>
+          <title>Review</title>
+          <description>
+            See results organized by rubric section — not WCAG codes. Drill into any issue
+            to see exactly what's wrong and where, with plain-language explanations.
+          </description>
+        </step>
+        <step number="3">
+          <icon>Sparkles</icon>
+          <title>Fix</title>
+          <description>
+            Apply one-click fixes for common issues, or follow guided instructions for
+            everything else. Watch your score climb in real time.
+          </description>
+        </step>
+      </content>
+      <background>White with subtle connecting line/arrow graphic between steps</background>
+    </section>
+
+    <section id="rubrics" name="Framework / Rubric Alignment">
+      <description>
+        Credibility section showing alignment with the three major rubrics. Uses a tabbed
+        interface to let visitors explore each rubric's coverage. This is critical for
+        decision-makers who need to know the tool maps to their specific rubric.
+      </description>
+      <layout>Section heading + tabbed content area (3 tabs)</layout>
+      <content>
+        <section_eyebrow>Framework Alignment</section_eyebrow>
+        <section_headline>Built on the rubrics you already trust.</section_headline>
+        <section_description>
+          Every scan rule in SIMPLIFY maps directly to one or more elements from these
+          evidence-based course quality and equity frameworks.
+        </section_description>
+        <tab id="cvc-oei">
+          <tab_title>CVC-OEI</tab_title>
+          <tab_subtitle>California Virtual Campus — Online Education Initiative</tab_subtitle>
+          <content>
+            - 44 elements across 4 sections (A: Content, B: Interaction, C: Assessment, D: Accessibility)
+            - High automation coverage for Section A (navigation, structure) and Section D (WCAG compliance)
+            - Medium coverage for Sections B and C with guided checklists
+            - PDF reports formatted for POCR submission
+          </content>
+          <coverage_visual>
+            4 horizontal bars showing coverage percentage per section:
+            A: Content Presentation — 85% automated
+            B: Interaction — 50% automated + checklist
+            C: Assessment — 40% automated + checklist
+            D: Accessibility — 95% automated
+          </coverage_visual>
+        </tab>
+        <tab id="quality-matters">
+          <tab_title>Quality Matters</tab_title>
+          <tab_subtitle>QM Higher Education Rubric, 7th Edition</tab_subtitle>
+          <content>
+            - 8 General Standards with 44 Specific Review Standards
+            - Strong automation for Standard 8 (Accessibility and Usability)
+            - Automatable indicators for Standards 1-7 (welcome page, objectives, broken links, support links)
+            - PDF reports formatted for QM review submission
+          </content>
+          <coverage_visual>
+            8 horizontal bars showing coverage per standard:
+            1: Course Overview — 60%
+            2: Learning Objectives — 45%
+            3: Assessment — 40%
+            4: Instructional Materials — 55%
+            5: Learning Activities — 35%
+            6: Course Technology — 50%
+            7: Learner Support — 60%
+            8: Accessibility — 95%
+          </coverage_visual>
+        </tab>
+        <tab id="peralta">
+          <tab_title>Peralta Equity</tab_title>
+          <tab_subtitle>Peralta Online Equity Rubric 3.0</tab_subtitle>
+          <content>
+            - 8 equity elements (E1-E8) designed to complement the CVC-OEI rubric
+            - Automated checks for E1 (Technology), E2 (Resources), E3 (UDL), and E8 (Belonging)
+            - Guided self-assessment checklists for E4-E7 (Diversity, Representation, Bias, Meaning)
+            - The only Canvas tool that addresses equity rubric elements
+          </content>
+          <coverage_visual>
+            8 elements with icons showing automated vs. checklist:
+            E1: Technology — Automated
+            E2: Resources — Automated
+            E3: UDL — Automated
+            E4: Diversity — Guided Checklist
+            E5: Images — Guided Checklist
+            E6: Bias — Guided Checklist
+            E7: Meaning — Guided Checklist
+            E8: Belonging — Automated + Checklist
+          </coverage_visual>
+        </tab>
+      </content>
+    </section>
+
+    <section id="comparison" name="Competitive Comparison">
+      <description>
+        Feature comparison table showing SIMPLIFY vs. the existing tools (UDOIT, Ally, Pope Tech,
+        Canvas built-in). This section directly addresses the "why switch?" question for
+        institutions already using other tools.
+      </description>
+      <layout>Section heading + responsive comparison table</layout>
+      <content>
+        <section_eyebrow>Why SIMPLIFY?</section_eyebrow>
+        <section_headline>Everything you need. Nothing you don't.</section_headline>
+        <comparison_table>
+          <columns>Feature, SIMPLIFY, UDOIT, Ally, Pope Tech, Canvas Built-in</columns>
+          <rows>
+            <row feature="Full-course HTML scan" simplify="yes" udoit="yes" ally="no" pope_tech="no" canvas="no" />
+            <row feature="Document scanning (PDF, DOCX)" simplify="yes" udoit="partial" ally="yes" pope_tech="no" canvas="no" />
+            <row feature="Course structure analysis" simplify="yes" udoit="no" ally="no" pope_tech="no" canvas="no" />
+            <row feature="CVC-OEI rubric alignment" simplify="yes" udoit="no" ally="no" pope_tech="no" canvas="no" />
+            <row feature="Quality Matters alignment" simplify="yes" udoit="no" ally="no" pope_tech="no" canvas="no" />
+            <row feature="Peralta Equity rubric" simplify="yes" udoit="no" ally="no" pope_tech="no" canvas="no" />
+            <row feature="One-click auto-fixes" simplify="yes" udoit="partial" ally="no" pope_tech="no" canvas="no" />
+            <row feature="AI-generated alt text" simplify="yes" udoit="no" ally="no" pope_tech="no" canvas="no" />
+            <row feature="Bulk fix operations" simplify="yes" udoit="no" ally="no" pope_tech="no" canvas="no" />
+            <row feature="Institutional dashboard" simplify="yes" udoit="no" ally="partial" pope_tech="yes" canvas="no" />
+            <row feature="PDF report export (POCR/QM)" simplify="yes" udoit="no" ally="no" pope_tech="no" canvas="no" />
+            <row feature="UDL content variety check" simplify="yes" udoit="no" ally="no" pope_tech="no" canvas="no" />
+            <row feature="Equity self-assessment" simplify="yes" udoit="no" ally="no" pope_tech="no" canvas="no" />
+            <row feature="Progress tracking over time" simplify="yes" udoit="no" ally="partial" pope_tech="partial" canvas="no" />
+          </rows>
+        </comparison_table>
+      </content>
+      <design_notes>
+        - SIMPLIFY column highlighted with blue background
+        - Yes = green checkmark, No = gray dash, Partial = amber half-circle
+        - On mobile: convert to stacked cards comparing SIMPLIFY vs. one competitor at a time
+      </design_notes>
+    </section>
+
+    <section id="testimonials" name="Social Proof / Testimonials">
+      <description>
+        Testimonial carousel featuring quotes from faculty, instructional designers, and
+        administrators. Uses placeholder quotes for now that reflect real personas.
+      </description>
+      <layout>Carousel with 3 visible cards at desktop, 1 at mobile, auto-advance</layout>
+      <content>
+        <section_eyebrow>What Educators Say</section_eyebrow>
+        <section_headline>Faculty love it. Admins trust it.</section_headline>
+        <testimonial id="1">
+          <quote>
+            I used to spend an entire prep week running UDOIT and fixing things page by page.
+            SIMPLIFY did my whole course in 30 seconds and fixed half the issues automatically.
+            I got my weekend back.
+          </quote>
+          <author>Dr. Maria Santos</author>
+          <role>Biology Faculty</role>
+          <institution>Bay Area Community College (placeholder)</institution>
+        </testimonial>
+        <testimonial id="2">
+          <quote>
+            The rubric-aligned reports are a game-changer for POCR. I can hand faculty a report
+            that maps directly to the CVC-OEI elements instead of making them decode WCAG codes.
+          </quote>
+          <author>James Chen</author>
+          <role>Instructional Designer</role>
+          <institution>Central Valley College District (placeholder)</institution>
+        </testimonial>
+        <testimonial id="3">
+          <quote>
+            For the first time, I can tell our accreditor exactly what percentage of our courses
+            meet accessibility standards — and show them the improvement trend. That used to be
+            a manual audit that took weeks.
+          </quote>
+          <author>Dr. Aisha Thompson</author>
+          <role>VP of Instruction</role>
+          <institution>Southern California CC District (placeholder)</institution>
+        </testimonial>
+        <testimonial id="4">
+          <quote>
+            The Peralta equity checklists opened my eyes to things I wasn't even thinking about.
+            It's not just about compliance — it's about whether my course actually works for
+            all of my students.
+          </quote>
+          <author>Prof. David Reyes</author>
+          <role>English Faculty</role>
+          <institution>Northern California College (placeholder)</institution>
+        </testimonial>
+      </content>
+    </section>
+
+    <section id="stats" name="Impact Statistics / By the Numbers">
+      <description>
+        Bold statistics strip with animated counters that convey product impact.
+        Numbers should trigger count-up animation when scrolled into view.
+      </description>
+      <layout>4-column horizontal strip on colored background</layout>
+      <content>
+        <stat id="1">
+          <number>50%</number>
+          <label>Less time on accessibility remediation</label>
+        </stat>
+        <stat id="2">
+          <number>40%+</number>
+          <label>Of issues auto-fixed with one click</label>
+        </stat>
+        <stat id="3">
+          <number>35+</number>
+          <label>Scan rules mapped across 3 rubrics</label>
+        </stat>
+        <stat id="4">
+          <number>30 sec</number>
+          <label>Average full-course scan time</label>
+        </stat>
+      </content>
+      <background>simplify-blue gradient (left to right, blue-dark to blue)</background>
+      <text_color>white</text_color>
+    </section>
+
+    <section id="pricing" name="Pricing">
+      <description>
+        Simple, transparent pricing section. EdTech buyers need to see pricing early —
+        hiding it behind "contact sales" loses trust. Offer a free pilot and two tiers.
+      </description>
+      <layout>3-column pricing cards</layout>
+      <content>
+        <section_eyebrow>Pricing</section_eyebrow>
+        <section_headline>Start with a free pilot. Scale when you're ready.</section_headline>
+        <plan id="pilot">
+          <name>Pilot</name>
+          <price>Free</price>
+          <period>60 days, up to 10 courses</period>
+          <description>Try SIMPLIFY risk-free with your real courses.</description>
+          <features>
+            - Full-course scanning (HTML content)
+            - CVC-OEI + QM rubric reporting
+            - One-click fixes (alt text, headings, contrast, tables)
+            - PDF report export
+            - Email support
+          </features>
+          <cta>Start Free Pilot</cta>
+          <cta_style>outline / secondary</cta_style>
+        </plan>
+        <plan id="institution" featured="true">
+          <name>Institution</name>
+          <price>Custom</price>
+          <period>per institution / per year</period>
+          <description>Full SIMPLIFY for your entire institution.</description>
+          <features>
+            - Everything in Pilot, plus:
+            - Document scanning (PDF, DOCX, PPTX)
+            - Peralta Equity rubric + UDL checks
+            - Institutional admin dashboard
+            - Scheduled scans + email summaries
+            - Dedicated onboarding + training
+            - Priority support + SLA
+          </features>
+          <cta>Request a Quote</cta>
+          <cta_style>primary / filled</cta_style>
+          <badge>Most Popular</badge>
+        </plan>
+        <plan id="enterprise">
+          <name>Enterprise</name>
+          <price>Custom</price>
+          <period>multi-campus / district</period>
+          <description>For districts and multi-college systems.</description>
+          <features>
+            - Everything in Institution, plus:
+            - Multi-campus aggregate dashboards
+            - Custom rubric configurations
+            - API access + webhooks
+            - SSO integration (SAML/CAS)
+            - Dedicated success manager
+            - SOC 2 compliance documentation
+          </features>
+          <cta>Contact Sales</cta>
+          <cta_style>outline / secondary</cta_style>
+        </plan>
+      </content>
+    </section>
+
+    <section id="faq" name="Frequently Asked Questions">
+      <description>
+        Accordion-style FAQ addressing the most common objections and questions from
+        faculty, instructional designers, and administrators.
+      </description>
+      <layout>Section heading + accordion (expandable items)</layout>
+      <content>
+        <section_eyebrow>FAQ</section_eyebrow>
+        <section_headline>Questions? We've got answers.</section_headline>
+        <faq id="1">
+          <question>How is SIMPLIFY different from UDOIT?</question>
+          <answer>
+            UDOIT scans native HTML content in Canvas, which is great — but it doesn't scan
+            uploaded documents (PDFs, Word files), doesn't map findings to CVC-OEI or QM rubric
+            elements, and offers limited auto-fix capabilities. SIMPLIFY does all of that in a
+            single tool, plus adds equity rubric alignment and institutional dashboards.
+          </answer>
+        </faq>
+        <faq id="2">
+          <question>Does SIMPLIFY replace Ally?</question>
+          <answer>
+            Ally is strong at scanning uploaded documents and providing alternative formats to
+            students. SIMPLIFY complements or replaces Ally by adding course-wide HTML scanning,
+            rubric-aligned reporting, one-click fixes, and course structure analysis. If you need
+            student-facing alternative formats (e.g., audio versions of PDFs), Ally still provides
+            that. For everything else, SIMPLIFY covers it.
+          </answer>
+        </faq>
+        <faq id="3">
+          <question>What rubrics does SIMPLIFY support?</question>
+          <answer>
+            At launch, SIMPLIFY supports three frameworks: the CVC-OEI Course Design Rubric
+            (Sections A-D), the Quality Matters Higher Education Rubric (8 Standards), and the
+            Peralta Online Equity Rubric 3.0 (Elements E1-E8). You can run reports against any
+            one rubric or all three simultaneously.
+          </answer>
+        </faq>
+        <faq id="4">
+          <question>Will SIMPLIFY change my course content without my approval?</question>
+          <answer>
+            Never. Every auto-fix is previewed before you apply it. You can edit suggestions,
+            skip issues, or dismiss them entirely. Bulk "Fix All" operations show you exactly
+            what will change before you confirm. And every fix is fully reversible — we maintain
+            a complete change log with one-click rollback.
+          </answer>
+        </faq>
+        <faq id="5">
+          <question>How long does a scan take?</question>
+          <answer>
+            A typical 16-week course with 50-100 content items scans in about 30 seconds.
+            Larger courses with many uploaded documents may take 1-2 minutes. You can
+            also schedule automatic weekly scans that run in the background and email you
+            a summary report.
+          </answer>
+        </faq>
+        <faq id="6">
+          <question>Is student data accessed or stored?</question>
+          <answer>
+            No. SIMPLIFY only accesses course content — pages, assignments, files, and structure.
+            It never accesses student submissions, grades, or personal information. We are fully
+            FERPA compliant and pursuing SOC 2 Type II certification.
+          </answer>
+        </faq>
+        <faq id="7">
+          <question>How does the pilot work?</question>
+          <answer>
+            The free pilot gives you 60 days with up to 10 courses. Your institution's Canvas
+            admin installs SIMPLIFY as an LTI tool (takes about 5 minutes). Faculty can then
+            launch it from any course's navigation menu. No credit card required. At the end
+            of the pilot, you can continue with an institutional license or simply uninstall.
+          </answer>
+        </faq>
+        <faq id="8">
+          <question>Does it work with other LMS platforms?</question>
+          <answer>
+            SIMPLIFY launches with Canvas LMS support. Support for Moodle, Blackboard Ultra,
+            and Brightspace is on our roadmap for 2027. If you're interested in a non-Canvas
+            LMS, let us know — it helps us prioritize.
+          </answer>
+        </faq>
+      </content>
+    </section>
+
+    <section id="cta" name="Final Call-to-Action">
+      <description>
+        Strong closing CTA section with a demo request form. This is where the conversion happens.
+        The form should be simple — name, email, institution, role, and an optional message.
+      </description>
+      <layout>Split — left: compelling copy; right: form</layout>
+      <content>
+        <headline>Ready to simplify accessibility?</headline>
+        <subheadline>
+          Join the pilot program and see how SIMPLIFY transforms your course cleanup workflow.
+          Free for 60 days. No credit card required. Setup takes 5 minutes.
+        </subheadline>
+        <form_fields>
+          <field name="name" type="text" label="Full Name" required="true" placeholder="Dr. Jane Smith" />
+          <field name="email" type="email" label="Work Email" required="true" placeholder="jsmith@college.edu" />
+          <field name="institution" type="text" label="Institution" required="true" placeholder="Bay Area Community College" />
+          <field name="role" type="select" label="Your Role" required="true">
+            <option>Faculty / Instructor</option>
+            <option>Instructional Designer</option>
+            <option>Accessibility Coordinator</option>
+            <option>Department Chair</option>
+            <option>Dean / VP of Instruction</option>
+            <option>IT / Canvas Admin</option>
+            <option>Other</option>
+          </field>
+          <field name="courses" type="select" label="How many courses?" required="false">
+            <option>1-5</option>
+            <option>6-20</option>
+            <option>21-100</option>
+            <option>100+</option>
+          </field>
+          <field name="message" type="textarea" label="Anything else we should know?" required="false"
+                 placeholder="E.g., we're preparing for POCR review, we currently use UDOIT..." />
+        </form_fields>
+        <submit_button>Request Free Pilot →</submit_button>
+        <privacy_note>
+          We respect your privacy. Your information is used only to set up your pilot
+          and will never be shared with third parties.
+        </privacy_note>
+      </content>
+      <background>slate-50 with subtle blue accent border or gradient</background>
+    </section>
+
+    <section id="footer" name="Footer">
+      <description>Standard marketing footer with navigation, legal links, and social proof.</description>
+      <layout>4-column footer grid</layout>
+      <content>
+        <column id="brand">
+          - SIMPLIFY logo wordmark
+          - One-line description: "Accessible, usable, equitable courses — simplified."
+          - Social media icons (LinkedIn, Twitter/X) — placeholder links
+        </column>
+        <column id="product">
+          <title>Product</title>
+          - Features
+          - How It Works
+          - Pricing
+          - Rubric Alignment
+          - Roadmap (placeholder)
+        </column>
+        <column id="resources">
+          <title>Resources</title>
+          - Documentation (placeholder)
+          - Blog (placeholder)
+          - CVC-OEI Rubric (external link)
+          - Quality Matters (external link)
+          - Peralta Equity Rubric (external link)
+        </column>
+        <column id="company">
+          <title>Company</title>
+          - About (placeholder)
+          - Contact
+          - Privacy Policy (placeholder)
+          - Terms of Service (placeholder)
+          - Accessibility Statement (placeholder)
+        </column>
+        <bottom_bar>
+          - © 2026 Simplify Inc. All rights reserved.
+          - "Built with accessibility in mind" badge
+        </bottom_bar>
+      </content>
+    </section>
+  </page_sections>
+
+  <design_system>
+    <layout_principles>
+      - Max content width: 1280px, centered with auto margins
+      - Section padding: py-20 (80px) on desktop, py-12 (48px) on mobile
+      - Card grid gaps: gap-8 (32px)
+      - Consistent section rhythm: eyebrow → headline → description → content
+      - Alternating section backgrounds: white → slate-50 → white → slate-50
+    </layout_principles>
+
+    <component_specs>
+      <buttons>
+        <primary>
+          bg-simplify-blue text-white font-semibold px-8 py-3 rounded-lg
+          hover:bg-simplify-blue-dark transition-colors duration-200
+          shadow-sm hover:shadow-md
+        </primary>
+        <secondary>
+          border-2 border-simplify-blue text-simplify-blue font-semibold px-8 py-3 rounded-lg
+          hover:bg-simplify-blue hover:text-white transition-all duration-200
+        </secondary>
+        <ghost>
+          text-simplify-blue font-medium hover:underline
+        </ghost>
+      </buttons>
+
+      <cards>
+        bg-white rounded-2xl border border-slate-200 p-8
+        shadow-sm hover:shadow-md transition-shadow duration-200
+      </cards>
+
+      <badges>
+        inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+        Variants: blue (info), green (success), amber (warning), red (critical)
+      </badges>
+
+      <section_eyebrow>
+        text-simplify-blue font-semibold text-sm uppercase tracking-widest mb-3
+      </section_eyebrow>
+
+      <section_headline>
+        text-slate-900 font-bold text-3xl md:text-4xl leading-tight mb-4
+        font-family: Plus Jakarta Sans
+      </section_headline>
+
+      <section_description>
+        text-slate-600 text-lg md:text-xl leading-relaxed max-w-3xl mx-auto mb-12
+      </section_description>
+    </component_specs>
+
+    <animations>
+      <scroll_reveal>
+        Framer Motion: elements fade up (y: 20 → 0, opacity: 0 → 1) as they enter viewport.
+        Stagger children by 100ms within card grids.
+        Duration: 500ms. Easing: easeOut.
+        Trigger: when element is 20% visible (whileInView with viewport once: true).
+      </scroll_reveal>
+      <counter>
+        Stats section: numbers count up from 0 to target value over 2 seconds.
+        Trigger on scroll into view. Use requestAnimationFrame or framer-motion useMotionValue.
+      </counter>
+      <hero_product>
+        Score gauge: animate from 0 to 72 over 1.5 seconds with easeOut.
+        Severity badges: stagger in with scale(0.8 → 1) + fade, 200ms delay between each.
+        Section bars: width grows from 0% to target over 1 second, staggered.
+      </hero_product>
+      <hover>
+        Cards: translateY(-2px) + shadow increase on hover, 200ms transition.
+        Buttons: background-color transition, 150ms.
+        Links: underline slide-in from left, 200ms.
+      </hover>
+      <tab_switch>
+        Rubric tabs: content cross-fades with 200ms transition. Active tab gets blue underline
+        that slides to follow selection.
+      </tab_switch>
+    </animations>
+
+    <responsive_breakpoints>
+      - Mobile: 0-639px (single column, stacked layout, hamburger nav)
+      - Tablet: 640-1023px (2 columns where applicable, condensed spacing)
+      - Desktop: 1024px+ (full layout as designed, max-w-7xl container)
+      - Large: 1280px+ (additional breathing room, larger hero text)
+    </responsive_breakpoints>
+
+    <accessibility_requirements>
+      - WCAG 2.1 AA compliant (the landing page itself must be accessible — it's an accessibility product!)
+      - All images have descriptive alt text
+      - Color contrast minimum 4.5:1 for body text, 3:1 for large text
+      - Keyboard navigable: all interactive elements reachable via Tab, activated via Enter/Space
+      - Focus indicators visible on all interactive elements (2px blue outline)
+      - Skip navigation link at page top
+      - Reduced motion: respect prefers-reduced-motion by disabling scroll animations
+      - Semantic HTML: proper heading hierarchy (single H1 in hero, H2 for sections, H3 for cards)
+      - Form fields: visible labels, error messages associated with fields, aria-describedby for hints
+      - Testimonial carousel: pause-on-hover, prev/next buttons, aria-live region
+    </accessibility_requirements>
+  </design_system>
+
+  <seo_and_metadata>
+    <title>SIMPLIFY — Canvas Course Accessibility &amp; Usability Plug-in | Simplify EdTech</title>
+    <meta_description>
+      SIMPLIFY is a Canvas LTI plug-in that scans your courses for accessibility and usability issues,
+      reports against CVC-OEI, Quality Matters, and Peralta rubrics, and offers one-click fixes.
+      Free pilot available.
+    </meta_description>
+    <og_title>SIMPLIFY — Stop juggling accessibility tools. Start fixing your courses.</og_title>
+    <og_description>
+      One Canvas plug-in that scans, reports, and fixes accessibility issues — aligned to the
+      rubrics you already use. Free 60-day pilot.
+    </og_description>
+    <og_image>Social share card with SIMPLIFY logo, tagline, and dashboard screenshot mockup</og_image>
+    <keywords>
+      Canvas LMS accessibility, course accessibility checker, CVC-OEI rubric tool, Quality Matters
+      accessibility, Peralta equity rubric, Canvas LTI plugin, WCAG course compliance, online course
+      accessibility, POCR accessibility, higher education accessibility tool, course design rubric,
+      accessible course design, Canvas accessibility plugin, UDOIT alternative, Ally alternative
+    </keywords>
+    <structured_data>
+      - Organization schema for Simplify Inc.
+      - SoftwareApplication schema for SIMPLIFY product
+      - FAQPage schema for the FAQ section
+    </structured_data>
+  </seo_and_metadata>
+
+  <key_interactions>
+    <navigation_flow>
+      1. User arrives on page (likely from search, conference link, or referral)
+      2. Hero communicates value prop in &lt; 5 seconds
+      3. Social proof bar builds immediate credibility
+      4. Scroll reveals problem framing (user sees their own pain reflected)
+      5. Solution section + features build desire
+      6. Rubric tabs let them verify their specific rubric is supported
+      7. Comparison table removes "why not stick with UDOIT/Ally" objection
+      8. Testimonials from peers build trust
+      9. Stats strip reinforces impact
+      10. Pricing removes cost anxiety (free pilot!)
+      11. FAQ handles remaining objections
+      12. Final CTA captures the lead
+    </navigation_flow>
+
+    <form_submission_flow>
+      1. User fills out form fields (client-side validation via Zod)
+      2. Clicks "Request Free Pilot"
+      3. Button shows loading spinner
+      4. POST to /api/pilot-request with form data
+      5. Server validates, stores in database, sends webhook to CRM, sends confirmation email
+      6. Form replaced with success message: "You're in! Check your email for next steps."
+      7. Success state includes: confirmation checkmark animation, what to expect next, link to documentation
+      8. GTM conversion event fires for ad tracking
+    </form_submission_flow>
+
+    <nav_scroll_behavior>
+      1. Nav links use smooth scroll to section anchors
+      2. Active section highlighted in nav based on scroll position (Intersection Observer)
+      3. "Watch Demo" opens a modal with embedded video (or placeholder)
+      4. "Request Pilot" smooth scrolls to final CTA form
+      5. Mobile nav: hamburger opens slide-out drawer, links close drawer after click
+    </nav_scroll_behavior>
+  </key_interactions>
+
+  <implementation_steps>
+    <step number="1">
+      <title>Project Setup and Foundation</title>
+      <tasks>
+        - Initialize Next.js 14+ project with App Router
+        - Configure Tailwind CSS with custom theme (colors, fonts, spacing from brand identity)
+        - Install dependencies: framer-motion, lucide-react, @radix-ui/react-accordion, @radix-ui/react-tabs, react-hook-form, zod
+        - Set up Google Fonts (Inter, Plus Jakarta Sans)
+        - Create layout.tsx with metadata, font loading, and global styles
+        - Create reusable component structure: /components/ui/, /components/sections/
+        - Set up tailwind.config.ts with custom colors (simplify-blue, etc.) and font families
+      </tasks>
+    </step>
+
+    <step number="2">
+      <title>Navigation and Hero Section</title>
+      <tasks>
+        - Build responsive Navbar component with scroll-triggered bg transition
+        - Implement mobile hamburger menu with slide-out drawer
+        - Build Hero section with split layout (text left, product visual right)
+        - Create animated product mockup SVG/CSS (score gauge, severity badges, section bars)
+        - Add social proof bar with placeholder institution logos
+        - Implement smooth-scroll navigation for all anchor links
+        - Add skip-navigation link for accessibility
+      </tasks>
+    </step>
+
+    <step number="3">
+      <title>Problem and Solution Sections</title>
+      <tasks>
+        - Build Problem section with 3-column pain point cards
+        - Add Lucide icons for each pain point
+        - Build Solution section with centered text + large product screenshot mockup
+        - Create product screenshot as a styled HTML/CSS component (not an image) for flexibility
+        - Add scroll-reveal animations (Framer Motion) for cards and sections
+      </tasks>
+    </step>
+
+    <step number="4">
+      <title>Features Deep Dive</title>
+      <tasks>
+        - Build alternating feature rows component (text + visual, flipping sides)
+        - Create 4 feature sections with icons, bullets, and mockup visuals
+        - Build feature visual mockups as styled components:
+          1. Scan progress indicator mockup
+          2. Rubric-aligned report mockup
+          3. Fix interface mockup (image + AI suggestion + buttons)
+          4. Admin dashboard chart mockup
+        - Add scroll-triggered stagger animations for bullet points
+      </tasks>
+    </step>
+
+    <step number="5">
+      <title>How It Works and Rubric Alignment</title>
+      <tasks>
+        - Build 3-step process section with numbered steps and connecting line graphic
+        - Build rubric alignment section with Radix UI Tabs
+        - Create 3 tab panels (CVC-OEI, Quality Matters, Peralta) with coverage visualizations
+        - Build animated coverage bar components (fills to percentage on scroll into view)
+        - Style active tab indicator with sliding underline animation
+      </tasks>
+    </step>
+
+    <step number="6">
+      <title>Comparison Table and Testimonials</title>
+      <tasks>
+        - Build responsive comparison table (table on desktop, stacked cards on mobile)
+        - Style checkmark/dash/partial icons for feature rows
+        - Highlight SIMPLIFY column with blue background
+        - Build testimonial carousel with auto-advance, pause on hover
+        - Add previous/next navigation buttons and dot indicators
+        - Ensure carousel is accessible (aria-live, keyboard controls)
+      </tasks>
+    </step>
+
+    <step number="7">
+      <title>Stats, Pricing, and FAQ</title>
+      <tasks>
+        - Build stats strip with animated count-up numbers (trigger on scroll)
+        - Build 3-column pricing cards with "Most Popular" badge on Institution plan
+        - Style pricing features with checkmark lists
+        - Build FAQ section with Radix UI Accordion (animated expand/collapse)
+        - Ensure accordion is keyboard accessible and uses proper ARIA attributes
+      </tasks>
+    </step>
+
+    <step number="8">
+      <title>CTA Form and Footer</title>
+      <tasks>
+        - Build final CTA section with split layout (copy left, form right)
+        - Implement form with React Hook Form + Zod validation
+        - Add client-side validation with inline error messages
+        - Create API route (/api/pilot-request) for form submission
+        - Add success state with confirmation animation
+        - Build 4-column footer with navigation links
+        - Add copyright bar with accessibility statement badge
+      </tasks>
+    </step>
+
+    <step number="9">
+      <title>Polish, Performance, and SEO</title>
+      <tasks>
+        - Audit all animations for prefers-reduced-motion support
+        - Run Lighthouse audit — target 95+ on all categories
+        - Verify WCAG 2.1 AA compliance with axe-core
+        - Test full keyboard navigation flow
+        - Test on mobile devices (iOS Safari, Android Chrome)
+        - Add structured data (Organization, SoftwareApplication, FAQPage)
+        - Add Open Graph and Twitter Card meta tags
+        - Optimize images with next/image and WebP format
+        - Minify and tree-shake CSS/JS
+        - Test form submission end-to-end
+        - Cross-browser testing (Chrome, Firefox, Safari, Edge)
+      </tasks>
+    </step>
+  </implementation_steps>
+
+  <success_criteria>
+    <design_quality>
+      - Visually distinctive — does NOT look like a generic SaaS template
+      - Consistent with brand identity (blue palette, Plus Jakarta Sans headings, Inter body)
+      - Product mockups feel authentic and detailed (not placeholder boxes)
+      - Animations enhance understanding without being distracting
+      - Whitespace and rhythm create comfortable reading experience
+    </design_quality>
+
+    <conversion_optimization>
+      - Primary CTA ("Request a Pilot") visible above the fold and in nav
+      - Clear value prop communicated within 5 seconds of landing
+      - Problem section creates recognition ("that's me!")
+      - Comparison table handles the "why switch?" objection
+      - FAQ handles remaining objections before they reach the form
+      - Form is short enough (6 fields, 2 optional) to not deter submissions
+      - Social proof (testimonials, stats, institution logos) builds trust throughout
+    </conversion_optimization>
+
+    <technical_quality>
+      - Lighthouse scores: Performance 95+, Accessibility 100, Best Practices 95+, SEO 100
+      - Core Web Vitals: LCP &lt; 2.5s, FID &lt; 100ms, CLS &lt; 0.1
+      - Fully responsive from 320px to 2560px
+      - WCAG 2.1 AA compliant (0 axe-core violations)
+      - Forms work with JavaScript disabled (progressive enhancement)
+      - Page loads in under 3 seconds on 3G connection
+    </technical_quality>
+
+    <accessibility>
+      - The landing page for an accessibility product MUST itself be fully accessible
+      - Single H1, proper heading hierarchy throughout
+      - All interactive elements keyboard accessible
+      - Focus visible on all focusable elements
+      - Color contrast meets AA minimums everywhere
+      - Screen reader tested (VoiceOver on macOS at minimum)
+      - Reduced motion mode functional
+      - Form errors announced to screen readers
+    </accessibility>
+
+    <content_quality>
+      - Copy speaks to educators, not IT departments
+      - Rubric terminology used correctly (CVC-OEI sections, QM standards, Peralta elements)
+      - Pain points resonate with actual faculty experience
+      - No jargon without context (WCAG, Section 508, etc. explained when used)
+      - CTAs use action-oriented, benefit-driven language
+    </content_quality>
+  </success_criteria>
+</project_specification>

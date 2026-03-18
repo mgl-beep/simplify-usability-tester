@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-simplify-blue: #2563EB;
+  --color-simplify-blue-dark: #1E40AF;
+  --color-simplify-blue-light: #DBEAFE;
+  --color-simplify-green: #059669;
+  --color-simplify-green-light: #D1FAE5;
+  --color-simplify-amber: #D97706;
+  --color-simplify-amber-light: #FEF3C7;
+  --color-simplify-red: #DC2626;
+  --color-simplify-red-light: #FEE2E2;
+
+  --font-heading: var(--font-plus-jakarta);
+  --font-body: var(--font-inter);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body), system-ui, sans-serif;
+  color: #334155;
+  background: #ffffff;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), system-ui, sans-serif;
+  color: #0F172A;
+}
+
+/* Skip nav */
+.skip-nav {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9999;
+  padding: 0.75rem 1.5rem;
+  background: #2563EB;
+  color: white;
+  font-weight: 600;
+  border-radius: 0 0 0.5rem 0;
+}
+.skip-nav:focus {
+  left: 0;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+}
+
+/* Radix accordion animation */
+[data-state="open"] > .accordion-chevron {
+  transform: rotate(180deg);
+}
+.accordion-chevron {
+  transition: transform 200ms ease;
+}
+
+@keyframes accordion-down {
+  from { height: 0; opacity: 0; }
+  to { height: var(--radix-accordion-content-height); opacity: 1; }
+}
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); opacity: 1; }
+  to { height: 0; opacity: 0; }
+}
+[data-state="open"] > .accordion-content {
+  animation: accordion-down 200ms ease-out;
+}
+[data-state="closed"] > .accordion-content {
+  animation: accordion-up 200ms ease-out;
+}
+
+/* Form input styling */
+.input-field {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #334155;
+  background: white;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.input-field:focus {
+  outline: none;
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+.input-field::placeholder {
+  color: #94a3b8;
+}

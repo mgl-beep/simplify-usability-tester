@@ -1,0 +1,113 @@
+  // Convert layout table to proper HTML structure (NEW VERSION - MULTI-SELECT + PREVIEW)
+  const convertLayoutTable = async () => {
+    if (!issue?.elementHtml || tablePurposes.length === 0) {
+      toast.error('Missing table data or purpose selection');
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      // Parse the table HTML to extract content
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(issue.elementHtml, 'text/html');
+      const table = doc.querySelector('table');
+      
+      if (!table) {
+        toast.error('Could not parse table HTML');
+        setIsGenerating(false);
+        return;
+      }
+
+      // Extract all cell content (preserving links and images)
+      const cells = Array.from(table.querySelectorAll('td, th'));
+      const cellContents = cells.map(cell => cell.innerHTML.trim()).filter(content => content);
+
+      let convertedHtml = '';
+
+      // Handle multi-purpose selection (use the primary purpose)
+      const primaryPurpose = tablePurposes[0];
+
+      switch (primaryPurpose) {
+        case 'list':
+          // Convert to unordered list - KEEP links intact
+          convertedHtml = '<ul>\n' + cellContents.map(content => `  <li>${content}</li>`).join('\n') + '\n</ul>';
+          break;
+
+        case 'links':
+          // Convert to navigation list - semantic <nav> structure
+          const linkItems = cellContents.map(content => {
+            // If cell already contains a link, keep it; otherwise wrap text in link placeholder
+            if (content.includes('<a ')) {
+              return `  <li>${content}</li>`;
+            }
+            return `  <li><a href="#">${content}</a></li>`;
+          }).join('\n');
+          convertedHtml = `<nav aria-label="Navigation">\n<ul>\n${linkItems}\n</ul>\n</nav>`;
+          break;
+
+        case 'gallery':
+          // Convert to stacked <figure><img> elements - NO CSS Grid
+          const galleryItems = cellContents.map(content => {
+            // Check if content has an <img> tag
+            if (content.includes('<img')) {
+              return `<figure>\n  ${content}\n</figure>`;
+            }
+            // If it's not an image, just wrap in figure
+            return `<figure>\n  ${content}\n</figure>`;
+          }).join('\n');
+          convertedHtml = galleryItems;
+          break;
+
+        case 'data':
+          // User selected "Actually data" - keep as table but add proper headers
+          toast.info('Please use the Table Headers/Caption fix instead for data tables.');
+          setIsGenerating(false);
+          return;
+
+        default:
+          toast.error('Invalid table purpose selected');
+          setIsGenerating(false);
+          return;
+      }
+
+      console.log('✅ Converted table HTML:', convertedHtml);
+      console.log('📝 Conversion details:', {
+        purposes: tablePurposes,
+        primaryPurpose,
+        originalCellCount: cellContents.length,
+        issueId: issue.id,
+        location: issue.location
+      });
+
+      // Show before/after preview before applying
+      setConvertedTableHtml(convertedHtml);
+      setPreviewOriginal(issue.elementHtml);
+      setPreviewFixed(convertedHtml);
+      setShowPreview(true);
+
+    } catch (error) {
+      console.error('❌ Error converting layout table:', error);
+      toast.error('Failed to convert table. Please try manual conversion.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Apply the converted table HTML after user confirms preview
+  const applyConvertedTable = () => {
+    if (!convertedTableHtml || !issue) {
+      toast.error('No converted HTML available');
+      return;
+    }
+
+    try {
+      onApplyFix(issue, convertedTableHtml);
+      toast.success('Table converted to accessible HTML structure!');
+      setShowPreview(false);
+      onClose();
+    } catch (error) {
+      console.error('❌ Error applying converted table:', error);
+      toast.error('Failed to apply conversion.');
+    }
+  };

@@ -1,0 +1,834 @@
+{
+  "_meta": {
+    "project": "SIMPLIFY LTI",
+    "version": "1.0.0",
+    "created": "2026-02-28",
+    "process": "BTR (Build, Test, Review)",
+    "instructions": "Agents: Only change the 'passes' field. Do not modify descriptions, steps, or structure. When implementing a feature, work on a feature branch named feature/<id>-<short-name>."
+  },
+  "features": [
+    {
+      "id": "F001",
+      "category": "core-connection",
+      "feature": "Canvas PAT Connection",
+      "description": "User can connect to Canvas LMS by entering their institution domain and Personal Access Token. Connection is validated against Canvas API via Supabase proxy.",
+      "priority": 0,
+      "dependencies": [],
+      "parallelizable": true,
+      "steps": [
+        "Open the app and click Connect to Canvas",
+        "Enter a Canvas domain (e.g., canvas.instructure.com)",
+        "Enter a valid Personal Access Token",
+        "Click Test Connection and verify success message",
+        "Verify courses load after successful connection",
+        "Refresh the page and verify token persists from localStorage"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F002",
+      "category": "core-connection",
+      "feature": "Fetch Course Content Types",
+      "description": "After connecting, fetch all content types from a Canvas course: pages, assignments, announcements, discussions, and quizzes via the Supabase Edge Function proxy.",
+      "priority": 0,
+      "dependencies": ["F001"],
+      "parallelizable": true,
+      "steps": [
+        "Connect to Canvas and select a course",
+        "Trigger a scan and verify pages are fetched",
+        "Verify assignments are fetched",
+        "Verify announcements are fetched",
+        "Verify discussions are fetched",
+        "Verify quizzes are fetched",
+        "Verify module structure is fetched"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F003",
+      "category": "core-scanning",
+      "feature": "Scan Orchestration",
+      "description": "courseScanner.ts orchestrates all five scanners sequentially: accessibility, usability, cvcOeiRubric, design, and link detection. All detected issues are returned as ScanIssue[] with standardsTags.",
+      "priority": 0,
+      "dependencies": ["F002"],
+      "parallelizable": true,
+      "steps": [
+        "Select a course and click Scan",
+        "Verify all five scanners run (check that issues from multiple categories appear)",
+        "Verify every returned issue has a non-empty standardsTags array",
+        "Verify every issue has required fields: id, type, category, severity, title, description",
+        "Verify issues are stored in scanResults state in App.tsx"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F004",
+      "category": "core-scanning",
+      "feature": "Live Scan Progress Display",
+      "description": "LiveScanView shows real-time scanning progress with per-item status as each content item is scanned.",
+      "priority": 0,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Start a scan on a course with multiple content items",
+        "Verify LiveScanView component appears during scan",
+        "Verify individual content items show progress (scanning/complete status)",
+        "Verify scan completion triggers transition to results view"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F005",
+      "category": "core-scanning",
+      "feature": "Per-Course Scan Cache",
+      "description": "Scan results persist to localStorage keyed by courseId. Cached results load instantly when revisiting a previously scanned course. courseId=0 (All Courses) is excluded from writes.",
+      "priority": 0,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course and verify results appear",
+        "Navigate away from the course and return — verify cached results load without re-scanning",
+        "Verify localStorage key 'simplify_all_scan_results' contains data for the courseId",
+        "Verify courseId=0 never appears as a key in the cached results",
+        "Refresh the browser and verify scan results persist"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F006",
+      "category": "core-scanning",
+      "feature": "Standards Filter Toggle",
+      "description": "User can toggle CVC-OEI, Quality Matters, and Peralta standards on/off. Filter applies globally across issues list, scan panel, and analytics views.",
+      "priority": 0,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Open Standards filter modal",
+        "Toggle off CVC-OEI and verify CVC-OEI-tagged issues disappear from the issues list",
+        "Toggle off QM and verify QM-tagged issues disappear",
+        "Toggle off Peralta and verify Peralta-tagged issues disappear",
+        "Re-enable all and verify all issues return",
+        "Verify filter state persists when switching views"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F010",
+      "category": "accessibility-scanning",
+      "feature": "Missing Alt Text Detection",
+      "description": "accessibilityScanner detects images missing alt attribute or with empty alt on non-decorative images. Maps to CVC-OEI D7 / WCAG 1.1.1.",
+      "priority": 0,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course containing images without alt text",
+        "Verify issues are created with type 'missing-alt-text'",
+        "Verify each issue has elementHtml containing the img tag",
+        "Verify standardsTags include 'cvc-oei:D7'",
+        "Verify severity is 'high'",
+        "Verify images with meaningful alt text are NOT flagged"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F011",
+      "category": "accessibility-scanning",
+      "feature": "Heading Hierarchy Violation Detection",
+      "description": "accessibilityScanner detects skipped heading levels, missing H1, and bold text used as pseudo-headings. Maps to CVC-OEI D1.",
+      "priority": 0,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course with pages that skip heading levels (e.g., H2 to H4)",
+        "Verify heading hierarchy issues are detected",
+        "Verify bold-as-heading patterns are flagged",
+        "Verify standardsTags include 'cvc-oei:D1'",
+        "Verify pages with correct heading hierarchy are NOT flagged"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F012",
+      "category": "accessibility-scanning",
+      "feature": "Table Headers Detection",
+      "description": "accessibilityScanner detects data tables without th elements in the first row. Maps to CVC-OEI D4.",
+      "priority": 0,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course with tables that use td instead of th for headers",
+        "Verify table header issues are created",
+        "Verify standardsTags include 'cvc-oei:D4'",
+        "Verify tables with proper th headers are NOT flagged"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F013",
+      "category": "accessibility-scanning",
+      "feature": "Table Caption Detection",
+      "description": "accessibilityScanner detects data tables without a caption element. Maps to CVC-OEI D4.",
+      "priority": 0,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course with tables missing caption elements",
+        "Verify table caption issues are created",
+        "Verify standardsTags include 'cvc-oei:D4'",
+        "Verify tables with caption elements are NOT flagged"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F014",
+      "category": "accessibility-scanning",
+      "feature": "Color Contrast Detection",
+      "description": "accessibilityScanner detects text with color contrast below WCAG 2.1 AA standard (4.5:1 ratio). Checks inline styles and data-mce-style. Walks ancestor chain for background color.",
+      "priority": 0,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course with low-contrast text (e.g., light gray on white)",
+        "Verify contrast issues are created with textColor and backgroundColor fields",
+        "Verify the contrast ratio is calculated correctly",
+        "Verify standardsTags include 'cvc-oei:D5'",
+        "Verify text with sufficient contrast is NOT flagged"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F015",
+      "category": "accessibility-scanning",
+      "feature": "Unclear Link Text Detection",
+      "description": "linkDetector flags non-descriptive link text ('click here', 'read more', etc.) and raw URLs used as link display text (>50 chars). Maps to CVC-OEI D3.",
+      "priority": 0,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course with links that say 'click here' or 'read more'",
+        "Verify unclear link text issues are created",
+        "Scan a course with raw URLs as link text",
+        "Verify raw URL link issues are created",
+        "Verify standardsTags include 'cvc-oei:D3'",
+        "Verify links with descriptive text are NOT flagged"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F016",
+      "category": "accessibility-scanning",
+      "feature": "Video Caption Detection",
+      "description": "usabilityScanner checks for YouTube videos without cc_load_policy parameter. Maps to CVC-OEI D12. Partial coverage — does not check non-YouTube video sources.",
+      "priority": 3,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course with YouTube embeds lacking cc_load_policy",
+        "Verify caption issues are created",
+        "Verify standardsTags include 'cvc-oei:D12'",
+        "Verify YouTube embeds WITH cc_load_policy are NOT flagged"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F018",
+      "category": "accessibility-scanning",
+      "feature": "Color as Sole Conveyor Detection (D6)",
+      "description": "Detect when color is used as the only means of conveying information (e.g., red text for important items with no other indicator). Maps to CVC-OEI D6. May be implemented as manual-check prompt.",
+      "priority": 3,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course with color-only information patterns",
+        "Verify a flag or manual-check prompt is generated",
+        "Verify standardsTags include 'cvc-oei:D6'"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F019",
+      "category": "accessibility-scanning",
+      "feature": "Auto-Play Media Detection (D16)",
+      "description": "Detect audio and video elements with autoplay attribute. Maps to CVC-OEI D16.",
+      "priority": 3,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course with audio/video elements that have autoplay attribute",
+        "Verify autoplay issues are created",
+        "Verify standardsTags include 'cvc-oei:D16'",
+        "Verify media elements without autoplay are NOT flagged"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F020",
+      "category": "rubric-scanning",
+      "feature": "Learning Objectives Detection (A1/A2)",
+      "description": "Detect whether modules contain learning objectives pages. AI generation available for missing objectives.",
+      "priority": 2,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course where some modules lack learning objectives",
+        "Verify objectives-related issues are created for modules without objectives",
+        "Verify standardsTags include 'cvc-oei:A1' or 'cvc-oei:A2'",
+        "Verify modules that have objectives are NOT flagged"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F021",
+      "category": "rubric-scanning",
+      "feature": "Content Organization Detection (A5)",
+      "description": "Detect whether course content is organized into distinct units/modules with appropriate depth.",
+      "priority": 2,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course with flat or poorly organized module structure",
+        "Verify organization issues are flagged",
+        "Verify standardsTags include 'cvc-oei:A5'"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F022",
+      "category": "rubric-scanning",
+      "feature": "Instructor Contact Info Detection (B3)",
+      "description": "cvcOeiRubricScanner checks for instructor contact information patterns in course content.",
+      "priority": 2,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course without visible instructor contact info",
+        "Verify contact info issue is flagged",
+        "Verify standardsTags include 'cvc-oei:B3'"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F030",
+      "category": "fix-workflow",
+      "feature": "Stage Fix (Preview Without Publishing)",
+      "description": "User can stage a fix which generates the fixed HTML locally and sets issue status to 'staged'. No changes are sent to Canvas until publish.",
+      "priority": 0,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Open an issue in IssueDetailModal",
+        "Apply a fix (e.g., add alt text to an image)",
+        "Verify the issue status changes to 'staged'",
+        "Verify no Canvas API call is made during staging",
+        "Verify the staged fix appears in the Before/After preview"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F031",
+      "category": "fix-workflow",
+      "feature": "Before/After HTML Preview",
+      "description": "Side-by-side comparison showing original HTML vs. fixed HTML before publishing. Available in IssueDetailModal and FixPreviewModal.",
+      "priority": 0,
+      "dependencies": ["F030"],
+      "parallelizable": true,
+      "steps": [
+        "Stage a fix for any issue type",
+        "Verify Before/After preview shows original content on one side",
+        "Verify the fixed content appears on the other side",
+        "Verify HTML rendering is accurate (not raw HTML)"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F032",
+      "category": "fix-workflow",
+      "feature": "Publish Fix to Canvas",
+      "description": "User confirms a staged fix, which sends the fixed HTML to Canvas via Supabase proxy. Issue status changes to 'published'.",
+      "priority": 0,
+      "dependencies": ["F030"],
+      "parallelizable": true,
+      "steps": [
+        "Stage a fix and confirm publish",
+        "Verify the fix is sent to Canvas via Supabase proxy",
+        "Verify the issue status changes to 'published'",
+        "Verify the content is updated in Canvas (check via Canvas LMS)"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F033",
+      "category": "fix-workflow",
+      "feature": "Undo Published Fix",
+      "description": "User can revert a published fix back to the original content. originalContent is stored during staging for this purpose.",
+      "priority": 0,
+      "dependencies": ["F032"],
+      "parallelizable": true,
+      "steps": [
+        "Publish a fix for an issue",
+        "Click undo/revert on the published issue",
+        "Verify original content is restored in Canvas",
+        "Verify issue status reverts appropriately"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F034",
+      "category": "fix-workflow",
+      "feature": "Batch Stage Auto-Fixable Issues",
+      "description": "User can stage all auto-fixable issues at once via batchStageFixes() in fixStaging.ts.",
+      "priority": 0,
+      "dependencies": ["F030"],
+      "parallelizable": true,
+      "steps": [
+        "Have multiple auto-fixable issues in scan results",
+        "Click batch stage button",
+        "Verify all auto-fixable issues change status to 'staged'",
+        "Verify non-auto-fixable issues remain 'pending'"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F035",
+      "category": "fix-workflow",
+      "feature": "Batch Publish Staged Fixes",
+      "description": "User can publish all staged fixes at once. Currently lacks per-item progress feedback during the publish process.",
+      "priority": 2,
+      "dependencies": ["F034"],
+      "parallelizable": true,
+      "steps": [
+        "Stage multiple fixes using batch stage",
+        "Click batch publish",
+        "Verify confirmation dialog appears",
+        "Verify all staged fixes are published to Canvas",
+        "Verify per-item progress is shown during publish (which item is being processed)",
+        "Verify success/failure status per item is displayed after completion"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F036",
+      "category": "fix-workflow",
+      "feature": "Publish Confirmation Modal",
+      "description": "A confirmation modal appears before publishing fixes. Includes a 'Don't show this again' checkbox that persists to localStorage.",
+      "priority": 0,
+      "dependencies": ["F032"],
+      "parallelizable": true,
+      "steps": [
+        "Attempt to publish a fix",
+        "Verify confirmation modal appears",
+        "Check 'Don't show this again' checkbox and confirm",
+        "Attempt another publish and verify modal is skipped",
+        "Clear localStorage and verify modal reappears"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F040",
+      "category": "fix-types",
+      "feature": "Alt Text Fix — Manual Entry",
+      "description": "User can manually enter alt text for images flagged as missing alt text. Fix is staged and can be published.",
+      "priority": 0,
+      "dependencies": ["F010", "F030"],
+      "parallelizable": true,
+      "steps": [
+        "Open a missing-alt-text issue in IssueDetailModal",
+        "Enter custom alt text in the input field",
+        "Stage the fix and verify the alt attribute is added in the preview",
+        "Publish and verify the image alt text is updated in Canvas"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F041",
+      "category": "fix-types",
+      "feature": "Alt Text Fix — AI Generated",
+      "description": "GPT-4o Vision analyzes the actual image and suggests alt text. User can edit before publishing.",
+      "priority": 0,
+      "dependencies": ["F010", "F030"],
+      "parallelizable": true,
+      "steps": [
+        "Open a missing-alt-text issue in IssueDetailModal",
+        "Click the AI suggestion button",
+        "Verify AI-generated alt text appears (may take a few seconds)",
+        "Verify user can edit the suggestion before staging",
+        "Stage and publish the fix"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F042",
+      "category": "fix-types",
+      "feature": "Heading Hierarchy Fix",
+      "description": "Fix heading level reassignment or conversion of headings to paragraph tags for heading hierarchy violations.",
+      "priority": 0,
+      "dependencies": ["F011", "F030"],
+      "parallelizable": true,
+      "steps": [
+        "Open a heading hierarchy issue",
+        "Select the correct heading level or convert to paragraph",
+        "Verify the Before/After preview shows the corrected hierarchy",
+        "Publish the fix and verify heading is updated in Canvas"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F043",
+      "category": "fix-types",
+      "feature": "Table Headers Fix",
+      "description": "Convert first-row td elements to th elements for tables missing proper headers.",
+      "priority": 0,
+      "dependencies": ["F012", "F030"],
+      "parallelizable": true,
+      "steps": [
+        "Open a table-missing-headers issue",
+        "Apply the table headers fix",
+        "Verify preview shows td elements converted to th in first row",
+        "Publish and verify table headers are updated in Canvas"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F044",
+      "category": "fix-types",
+      "feature": "Table Caption Fix — Manual and AI",
+      "description": "Add a caption to data tables. User can enter manually or use AI-generated caption suggestion.",
+      "priority": 0,
+      "dependencies": ["F013", "F030"],
+      "parallelizable": true,
+      "steps": [
+        "Open a table-missing-caption issue",
+        "Enter a manual caption and verify preview shows caption element added",
+        "Alternatively, click AI suggestion and verify caption is generated",
+        "Verify user can edit AI suggestion before staging",
+        "Publish and verify caption is added in Canvas"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F045",
+      "category": "fix-types",
+      "feature": "Color Contrast Fix",
+      "description": "Override text color with a WCAG-passing color via inline style. suggestedFix format is raw CSS 'color:#xxxxxx' parsed with regex.",
+      "priority": 0,
+      "dependencies": ["F014", "F030"],
+      "parallelizable": true,
+      "steps": [
+        "Open a color contrast issue",
+        "Verify suggested color meets 4.5:1 contrast ratio",
+        "Apply the contrast fix",
+        "Verify preview shows updated text color",
+        "Verify raw CSS string is NOT shown to user (parsed and displayed as color swatch)",
+        "Publish and verify color is updated in Canvas"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F046",
+      "category": "fix-types",
+      "feature": "Link Text Fix — Manual and AI",
+      "description": "Replace unclear link text with descriptive text. User can enter manually or use AI-generated suggestion.",
+      "priority": 0,
+      "dependencies": ["F015", "F030"],
+      "parallelizable": true,
+      "steps": [
+        "Open an unclear-link-text issue",
+        "Enter manual descriptive link text and verify preview",
+        "Alternatively, click AI suggestion and verify descriptive text is generated",
+        "Verify user can edit AI suggestion before staging",
+        "Publish and verify link text is updated in Canvas"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F047",
+      "category": "fix-types",
+      "feature": "Learning Objectives AI Generation",
+      "description": "Generate Bloom's taxonomy-aligned learning objectives for modules. Inject objectives into module overview page via Canvas API.",
+      "priority": 0,
+      "dependencies": ["F020", "F030"],
+      "parallelizable": true,
+      "steps": [
+        "Open a missing-objectives issue",
+        "Click generate objectives button",
+        "Verify AI generates Bloom's taxonomy-aligned objectives",
+        "Verify objectives display with Bloom's level badges (tiny colored pills)",
+        "Verify user can edit objectives before staging",
+        "Publish and verify objectives page is created/updated in Canvas module"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F048",
+      "category": "fix-types",
+      "feature": "Dense Paragraph AI Rewrite",
+      "description": "AI-powered rewrite suggestion for paragraphs flagged as too long (>600 words). User reviews and edits before publishing.",
+      "priority": 2,
+      "dependencies": ["F003", "F030"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course with a page containing a paragraph over 600 words",
+        "Verify a dense-paragraph issue is created",
+        "Open the issue and click AI rewrite suggestion",
+        "Verify AI generates a shorter, chunked version of the content",
+        "Verify user can edit the rewrite before staging",
+        "Publish and verify content is updated in Canvas"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F049",
+      "category": "fix-types",
+      "feature": "Layout Table Semantic Conversion",
+      "description": "Tables used for layout (not data) should have a purpose-selection step (list, nav, gallery, side-by-side, spacing, data) before generating the semantic HTML replacement.",
+      "priority": 2,
+      "dependencies": ["F012", "F030"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course with tables used for layout purposes",
+        "Verify layout table issues are detected and flagged",
+        "Open the issue and verify a purpose-selection UI appears",
+        "Select a purpose (e.g., 'list of items') and verify appropriate semantic HTML is generated",
+        "Verify Before/After preview shows table replaced with semantic markup",
+        "Publish and verify conversion in Canvas"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F050",
+      "category": "fix-types",
+      "feature": "AI Broken Link Replacement",
+      "description": "For broken links detected by linkDetector, suggest replacement URL and descriptive link text via AI.",
+      "priority": 2,
+      "dependencies": ["F015", "F030"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course with broken links",
+        "Verify broken link issues are detected",
+        "Open the issue and click AI replacement suggestion",
+        "Verify AI suggests a replacement URL and descriptive link text",
+        "Verify user can edit both URL and text before staging",
+        "Publish and verify link is updated in Canvas"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F060",
+      "category": "analytics",
+      "feature": "Overall Compliance Score",
+      "description": "Display an overall compliance score as a weighted average across all detected issues. Scoring: high=-10, medium=-5, low=-2 from base 100, floor at 0.",
+      "priority": 0,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course and navigate to Analytics tab",
+        "Verify an overall compliance score is displayed",
+        "Verify score decreases when issues are present",
+        "Verify score increases after fixing issues",
+        "Verify score never goes below 0"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F061",
+      "category": "analytics",
+      "feature": "Per-Rubric Compliance Breakdown",
+      "description": "Show separate compliance percentages for CVC-OEI, Quality Matters, and Peralta standards. Fixed: now shows penalty-based compliance percentages with color coding.",
+      "priority": 1,
+      "dependencies": ["F003", "F006"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course with issues tagged to multiple standards",
+        "Navigate to Analytics tab",
+        "Verify CVC-OEI compliance percentage is greater than 0% (not stuck at 0)",
+        "Verify Quality Matters compliance percentage is greater than 0%",
+        "Verify Peralta compliance percentage is greater than 0%",
+        "Verify percentages change when standards filter toggles are changed",
+        "Verify percentages match the actual ratio of resolved vs total issues per standard"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F062",
+      "category": "analytics",
+      "feature": "Severity Distribution Chart",
+      "description": "Display a chart showing the count of high, medium, and low severity issues.",
+      "priority": 0,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course and navigate to Analytics tab",
+        "Verify severity distribution chart displays",
+        "Verify high, medium, and low counts match actual issue counts",
+        "Verify chart updates after fixing issues"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F070",
+      "category": "audit-reports",
+      "feature": "Compliance Report View",
+      "description": "ComplianceReports.tsx displays a formatted compliance report with standards grid and critical issues list.",
+      "priority": 0,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Scan a course and navigate to Compliance Reports",
+        "Verify the report displays with standards compliance grid",
+        "Verify critical (high severity) issues are listed",
+        "Verify the report reflects current scan data"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F071",
+      "category": "audit-reports",
+      "feature": "PDF Export",
+      "description": "Export the compliance report as a downloadable PDF document. Fixed: uses jsPDF for direct programmatic PDF download.",
+      "priority": 1,
+      "dependencies": ["F070"],
+      "parallelizable": true,
+      "steps": [
+        "Navigate to Compliance Reports with scan data loaded",
+        "Click the PDF export button",
+        "Verify a PDF file downloads to the user's machine",
+        "Open the PDF and verify it contains the report content",
+        "Verify the PDF includes the standards grid and critical issues",
+        "Verify the PDF is properly formatted and readable"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F072",
+      "category": "audit-reports",
+      "feature": "Leadership Brief Generation",
+      "description": "Generate a leadership brief summary of compliance status. Text generation works but PDF export of the brief is broken.",
+      "priority": 2,
+      "dependencies": ["F070"],
+      "parallelizable": true,
+      "steps": [
+        "Navigate to Compliance Reports",
+        "Click generate leadership brief",
+        "Verify brief text is generated summarizing compliance status",
+        "Verify brief can be exported (once PDF export is fixed)"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F080",
+      "category": "imscc-import",
+      "feature": "IMSCC File Upload and Parse",
+      "description": "Upload an IMSCC course package, parse it with JSZip, and store in Supabase for scanning.",
+      "priority": 3,
+      "dependencies": [],
+      "parallelizable": true,
+      "steps": [
+        "Click Import Course and select an IMSCC file",
+        "Verify the file uploads and parsing begins",
+        "Verify course content is extracted from the package",
+        "Verify the imported course appears in the course list",
+        "Verify imported course can be selected and scanned"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F090",
+      "category": "course-builders",
+      "feature": "Course Template Builder",
+      "description": "Interface for creating courses from predefined templates. CourseBuilders.tsx provides template selection and CourseTemplates.tsx defines available templates.",
+      "priority": 3,
+      "dependencies": ["F001"],
+      "parallelizable": true,
+      "steps": [
+        "Navigate to Builders tab",
+        "View available course templates",
+        "Select a template and preview its structure",
+        "Create a course from the template (if Canvas connected)"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F091",
+      "category": "course-builders",
+      "feature": "AI Content Template Generation",
+      "description": "AI generates content templates via the /generate-template endpoint on the Supabase Edge Function.",
+      "priority": 3,
+      "dependencies": ["F090"],
+      "parallelizable": true,
+      "steps": [
+        "Navigate to Builders tab",
+        "Request an AI-generated template",
+        "Verify AI returns a content template",
+        "Verify user can preview and edit the template"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F100",
+      "category": "ui-polish",
+      "feature": "Batch Publish Progress Feedback",
+      "description": "During batch publish, show per-item progress indicating which fix is being processed and whether each succeeded or failed.",
+      "priority": 2,
+      "dependencies": ["F035"],
+      "parallelizable": true,
+      "steps": [
+        "Batch publish multiple staged fixes",
+        "Verify a progress indicator shows which item is currently being published",
+        "Verify each item shows success or failure status after processing",
+        "Verify a summary is shown after all items complete"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F101",
+      "category": "ui-polish",
+      "feature": "Scan Error Handling and Retry",
+      "description": "When a scan fails partway (network error, rate limit), display a visible error state with retry option instead of silent failure.",
+      "priority": 4,
+      "dependencies": ["F003"],
+      "parallelizable": true,
+      "steps": [
+        "Trigger a scan that encounters a network error",
+        "Verify an error message is displayed to the user (not silent)",
+        "Verify a retry button is available",
+        "Click retry and verify the scan resumes or restarts"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F102",
+      "category": "ui-polish",
+      "feature": "Modal UI Consistency Across Flag Types",
+      "description": "All issue type modals (alt text, contrast, table, video caption, link text, objectives) should follow consistent card styling: border-[#d2d2d7] rounded-[10px] bg-white, heading outside container with icon.",
+      "priority": 4,
+      "dependencies": ["F030"],
+      "parallelizable": true,
+      "steps": [
+        "Open an alt text issue modal — verify card style matches design system",
+        "Open a contrast issue modal — verify consistent styling",
+        "Open a table issue modal — verify consistent styling",
+        "Open a link text issue modal — verify consistent styling",
+        "Open an objectives issue modal — verify consistent styling",
+        "Verify all modals use the same heading/icon/card pattern"
+      ],
+      "passes": true
+    },
+    {
+      "id": "F103",
+      "category": "ui-polish",
+      "feature": "Onboarding Tour",
+      "description": "First-run walkthrough tour introduces new users to the app's key features. OnboardingTour.tsx component.",
+      "priority": 0,
+      "dependencies": [],
+      "parallelizable": true,
+      "steps": [
+        "Clear localStorage and open the app (simulate first visit)",
+        "Verify onboarding tour launches automatically",
+        "Step through each tour highlight",
+        "Verify tour can be dismissed",
+        "Verify tour does not reappear on subsequent visits"
+      ],
+      "passes": true
+    }
+  ]
+}

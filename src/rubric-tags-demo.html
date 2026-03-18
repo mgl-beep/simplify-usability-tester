@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rubric Tags Design Options</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f7;
+      padding: 40px 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="max-w-5xl mx-auto space-y-8">
+    <div class="text-center">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Rubric Tags Design Options</h1>
+      <p class="text-gray-600">Choose your preferred design for displaying standard tags</p>
+    </div>
+    
+    <!-- OPTION 1: Current Design - Grouped with Labels -->
+    <div class="bg-white rounded-xl shadow-sm p-6 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Option 1: Grouped with Labels (Current)</h2>
+        <span class="text-xs text-gray-500">Most explicit, clearest hierarchy</span>
+      </div>
+      <div class="flex items-center gap-3 px-3 py-2 bg-gradient-to-r from-orange-50 via-white to-green-50 border border-gray-200 rounded-lg">
+        <div class="inline-flex items-center gap-1.5">
+          <span class="text-xs font-semibold text-gray-900">CVC-OEI:</span>
+          <span class="px-1.5 py-0.5 bg-orange-500 text-white text-xs font-bold rounded">A4</span>
+          <span class="text-gray-400">,</span>
+          <span class="px-1.5 py-0.5 bg-orange-500 text-white text-xs font-bold rounded">A5</span>
+          <span class="text-gray-400">,</span>
+          <span class="px-1.5 py-0.5 bg-orange-500 text-white text-xs font-bold rounded">A8</span>
+        </div>
+        <div class="w-px h-4 bg-gray-300"></div>
+        <div class="inline-flex items-center gap-1.5">
+          <span class="text-xs font-semibold text-green-600">PERALTA:</span>
+          <span class="px-1.5 py-0.5 bg-green-500 text-white text-xs font-bold rounded">E5</span>
+        </div>
+        <div class="w-px h-4 bg-gray-300"></div>
+        <div class="inline-flex items-center gap-1.5">
+          <span class="text-xs font-semibold text-blue-600">QM:</span>
+          <span class="px-1.5 py-0.5 bg-blue-600 text-white text-xs font-bold rounded">8.1</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPTION 2: Pill Style -->
+    <div class="bg-white rounded-xl shadow-sm p-6 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Option 2: Pill/Chip Style</h2>
+        <span class="text-xs text-gray-500">Modern, each tag self-contained</span>
+      </div>
+      <div class="flex items-center flex-wrap gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg">
+        <span class="inline-flex items-center gap-1 px-2 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full">
+          <span class="opacity-80">CVC-OEI</span>
+          <span>A4</span>
+        </span>
+        <span class="inline-flex items-center gap-1 px-2 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full">
+          <span class="opacity-80">CVC-OEI</span>
+          <span>A5</span>
+        </span>
+        <span class="inline-flex items-center gap-1 px-2 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full">
+          <span class="opacity-80">CVC-OEI</span>
+          <span>A8</span>
+        </span>
+        <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
+          <span class="opacity-80">PERALTA</span>
+          <span>E5</span>
+        </span>
+        <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
+          <span class="opacity-80">QM</span>
+          <span>8.1</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- OPTION 3: Compact Badges Only -->
+    <div class="bg-white rounded-xl shadow-sm p-6 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Option 3: Compact Badges Only</h2>
+        <span class="text-xs text-gray-500">Minimal, relies on color coding</span>
+      </div>
+      <div class="flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-200 rounded-lg">
+        <span class="px-1.5 py-0.5 bg-orange-500 text-white text-xs font-bold rounded">A4</span>
+        <span class="px-1.5 py-0.5 bg-orange-500 text-white text-xs font-bold rounded">A5</span>
+        <span class="px-1.5 py-0.5 bg-orange-500 text-white text-xs font-bold rounded">A8</span>
+        <span class="text-gray-300">•</span>
+        <span class="px-1.5 py-0.5 bg-green-500 text-white text-xs font-bold rounded">E5</span>
+        <span class="text-gray-300">•</span>
+        <span class="px-1.5 py-0.5 bg-blue-600 text-white text-xs font-bold rounded">8.1</span>
+      </div>
+    </div>
+
+    <!-- OPTION 4: Inline with Colored Text -->
+    <div class="bg-white rounded-xl shadow-sm p-6 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Option 4: Inline with Colored Text</h2>
+        <span class="text-xs text-gray-500">Clean, text-focused</span>
+      </div>
+      <div class="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm">
+        <span class="inline-flex items-center gap-1 mr-3">
+          <span class="font-semibold text-orange-500">CVC-OEI</span>
+          <span class="text-gray-600">A4, A5, A8</span>
+        </span>
+        <span class="inline-flex items-center gap-1 mr-3">
+          <span class="font-semibold text-green-500">PERALTA</span>
+          <span class="text-gray-600">E5</span>
+        </span>
+        <span class="inline-flex items-center gap-1">
+          <span class="font-semibold text-blue-600">QM</span>
+          <span class="text-gray-600">8.1</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- OPTION 5: Outlined Badges -->
+    <div class="bg-white rounded-xl shadow-sm p-6 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Option 5: Outlined Badges</h2>
+        <span class="text-xs text-gray-500">Lighter visual weight</span>
+      </div>
+      <div class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg">
+        <div class="inline-flex items-center gap-1.5">
+          <span class="text-xs font-semibold text-orange-500">CVC-OEI</span>
+          <span class="px-1.5 py-0.5 border-2 border-orange-500 text-orange-500 text-xs font-bold rounded">A4</span>
+          <span class="px-1.5 py-0.5 border-2 border-orange-500 text-orange-500 text-xs font-bold rounded">A5</span>
+          <span class="px-1.5 py-0.5 border-2 border-orange-500 text-orange-500 text-xs font-bold rounded">A8</span>
+        </div>
+        <span class="text-gray-300">|</span>
+        <div class="inline-flex items-center gap-1.5">
+          <span class="text-xs font-semibold text-green-500">PERALTA</span>
+          <span class="px-1.5 py-0.5 border-2 border-green-500 text-green-500 text-xs font-bold rounded">E5</span>
+        </div>
+        <span class="text-gray-300">|</span>
+        <div class="inline-flex items-center gap-1.5">
+          <span class="text-xs font-semibold text-blue-600">QM</span>
+          <span class="px-1.5 py-0.5 border-2 border-blue-600 text-blue-600 text-xs font-bold rounded">8.1</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPTION 6: Subtle Background -->
+    <div class="bg-white rounded-xl shadow-sm p-6 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Option 6: Subtle Background Groups</h2>
+        <span class="text-xs text-gray-500">⭐ Recommended - Clear grouping, softer</span>
+      </div>
+      <div class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg">
+        <div class="inline-flex items-center gap-1.5 px-2 py-1 bg-orange-50 rounded">
+          <span class="text-xs font-semibold text-orange-500">CVC-OEI</span>
+          <span class="text-xs font-bold text-orange-500">A4</span>
+          <span class="text-orange-300">,</span>
+          <span class="text-xs font-bold text-orange-500">A5</span>
+          <span class="text-orange-300">,</span>
+          <span class="text-xs font-bold text-orange-500">A8</span>
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-2 py-1 bg-green-50 rounded">
+          <span class="text-xs font-semibold text-green-600">PERALTA</span>
+          <span class="text-xs font-bold text-green-600">E5</span>
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-2 py-1 bg-blue-50 rounded">
+          <span class="text-xs font-semibold text-blue-600">QM</span>
+          <span class="text-xs font-bold text-blue-600">8.1</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPTION 7: Dot Separators -->
+    <div class="bg-white rounded-xl shadow-sm p-6 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Option 7: Dot Separators (Minimalist)</h2>
+        <span class="text-xs text-gray-500">Most compact</span>
+      </div>
+      <div class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm">
+        <span class="font-semibold text-gray-900">Standards:</span>
+        <span class="inline-flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+          <span class="text-gray-900">A4</span>
+        </span>
+        <span class="text-gray-900">A5</span>
+        <span class="text-gray-900">A8</span>
+        <span class="inline-flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+          <span class="text-gray-900">E5</span>
+        </span>
+        <span class="inline-flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+          <span class="text-gray-900">8.1</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="text-center text-sm text-gray-500 pt-8">
+      <p>💡 My recommendation: <strong>Option 6 (Subtle Background)</strong> provides the best balance of clarity and visual appeal</p>
+    </div>
+  </div>
+</body>
+</html>

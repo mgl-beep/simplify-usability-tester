@@ -1,0 +1,494 @@
+{
+  "project": "SIMPLIFY Landing Page",
+  "description": "Marketing landing page for SIMPLIFY — a Canvas LTI plug-in that scans courses for accessibility/usability issues and offers one-click fixes, aligned to CVC-OEI, Quality Matters, and Peralta Equity rubrics.",
+  "tech_stack": {
+    "framework": "Next.js 14+ (App Router)",
+    "styling": "Tailwind CSS 3.4+",
+    "animations": "Framer Motion",
+    "icons": "Lucide React",
+    "fonts": ["Plus Jakarta Sans (headings)", "Inter (body)"],
+    "components": "Radix UI (accordion, tabs)",
+    "forms": "React Hook Form + Zod",
+    "deployment": "Vercel"
+  },
+  "brand": {
+    "colors": {
+      "primary": "#2563EB",
+      "primary_dark": "#1E40AF",
+      "primary_light": "#DBEAFE",
+      "success": "#059669",
+      "success_light": "#D1FAE5",
+      "warning": "#D97706",
+      "warning_light": "#FEF3C7",
+      "danger": "#DC2626",
+      "danger_light": "#FEE2E2",
+      "text_primary": "#0F172A",
+      "text_secondary": "#334155",
+      "text_muted": "#64748B",
+      "border": "#E2E8F0",
+      "bg_alt": "#F8FAFC",
+      "bg_white": "#FFFFFF"
+    },
+    "fonts": {
+      "heading": "Plus Jakarta Sans",
+      "body": "Inter"
+    }
+  },
+  "dependency_legend": {
+    "blocked_by": "This feature CANNOT start until the listed features are complete. These are hard dependencies — the feature literally won't work without them.",
+    "non_blocking": "These features are related and benefit from being done first, but this feature CAN proceed independently. Soft dependencies — nice to have in order, but parallelizable.",
+    "blocks": "Other features that are waiting on THIS feature to complete before they can start."
+  },
+  "execution_phases": [
+    {
+      "phase": 1,
+      "name": "Foundation",
+      "features": ["F001"],
+      "description": "Project setup — everything depends on this. Must complete first."
+    },
+    {
+      "phase": 2,
+      "name": "Page Shell",
+      "features": ["F002", "F015", "F018"],
+      "description": "Navigation, footer, and SEO metadata. These frame the page and can be built in parallel."
+    },
+    {
+      "phase": 3,
+      "name": "Core Sections (Above the Fold)",
+      "features": ["F003", "F004", "F005"],
+      "description": "Hero, problem statement, and solution overview. The most important content. Can be built in parallel."
+    },
+    {
+      "phase": 4,
+      "name": "Feature Sections (Below the Fold)",
+      "features": ["F006", "F007", "F008", "F009", "F010", "F011"],
+      "description": "Features, how-it-works, rubrics, comparison, testimonials, stats. All independent sections, parallelizable."
+    },
+    {
+      "phase": 5,
+      "name": "Conversion Sections",
+      "features": ["F012", "F013", "F014"],
+      "description": "Pricing, FAQ, and CTA form. These drive conversions and can be built in parallel."
+    },
+    {
+      "phase": 6,
+      "name": "Quality & Polish",
+      "features": ["F016", "F017", "F019"],
+      "description": "Accessibility audit, responsive testing, and performance optimization. Must happen after all sections are built."
+    }
+  ],
+  "features": [
+    {
+      "id": "F001",
+      "section": "project-setup",
+      "name": "Next.js Project Initialization",
+      "description": "Initialize a Next.js 14+ project with App Router, Tailwind CSS, TypeScript, and all required dependencies. Configure tailwind.config.ts with custom brand colors (simplify-blue: #2563EB, simplify-blue-dark: #1E40AF, simplify-blue-light: #DBEAFE, simplify-green: #059669, simplify-amber: #D97706, simplify-red: #DC2626 and their light variants), custom font families (Plus Jakarta Sans for headings, Inter for body), and spacing scale. Set up Google Fonts via next/font. Create the base layout.tsx with metadata (title: 'SIMPLIFY — Canvas Course Accessibility & Usability Plug-in'), font loading, and global styles. Create a /components/ui/ directory for reusable primitives and /components/sections/ for page sections.",
+      "blocked_by": [],
+      "non_blocking": [],
+      "blocks": ["F002", "F003", "F004", "F005", "F006", "F007", "F008", "F009", "F010", "F011", "F012", "F013", "F014", "F015", "F018"],
+      "phase": 1,
+      "verification": [
+        "Run `npm run dev` and confirm the app starts on port 3000 without errors",
+        "Verify Tailwind custom colors are available (e.g., bg-simplify-blue renders #2563EB)",
+        "Verify Plus Jakarta Sans renders for headings and Inter for body text",
+        "Verify page title in browser tab reads correctly",
+        "Verify /components/ui/ and /components/sections/ directories exist"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F002",
+      "section": "navigation",
+      "name": "Fixed Navigation Bar",
+      "description": "Build a fixed top navigation bar that starts transparent over the hero and transitions to a solid white background with a subtle bottom shadow after scrolling 50px. Left side: SIMPLIFY text wordmark in Plus Jakarta Sans extrabold, text-simplify-blue. Center: nav links — Features, How It Works, Rubrics, Pricing, FAQ — each smooth-scrolling to the corresponding section anchor. Right side: two CTA buttons — 'Watch Demo' (outline/ghost style) and 'Request Pilot' (primary filled blue). On mobile (< 768px): collapse nav links and CTAs into a hamburger icon that opens a full-height slide-out drawer from the right. Active section should be highlighted in nav based on scroll position using Intersection Observer. Include a visually-hidden skip-navigation link as the first focusable element.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F003", "F004", "F005", "F006", "F007", "F008", "F009", "F010", "F011", "F012", "F013", "F014"],
+      "blocks": [],
+      "phase": 2,
+      "verification": [
+        "Nav is fixed at top and visible while scrolling",
+        "Background is transparent at page top and transitions to white with shadow after scrolling",
+        "All nav links smooth-scroll to their target sections",
+        "Active section is highlighted in nav while scrolling through the page",
+        "Mobile hamburger menu opens and closes correctly",
+        "Mobile drawer links navigate and close the drawer",
+        "'Request Pilot' button scrolls to the CTA form section",
+        "Skip-navigation link is present and works via keyboard (Tab then Enter)",
+        "Nav is fully keyboard-navigable"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F003",
+      "section": "hero",
+      "name": "Hero Section with Animated Product Mockup",
+      "description": "Build a full-viewport hero section with a split layout: left side (60%) contains text content, right side (40%) contains an animated product mockup. Left content: eyebrow text 'Canvas LTI Plug-in for Higher Education' in simplify-blue uppercase tracking-widest. Headline: 'Stop juggling accessibility tools. Start fixing your courses.' in Plus Jakarta Sans extrabold, text-4xl md:text-5xl, slate-900. Subheadline: 'SIMPLIFY scans your entire Canvas course against the rubrics you already use — CVC-OEI, Quality Matters, and Peralta Equity — then fixes issues with one click.' in slate-600, text-lg. Two CTAs: 'Request a Pilot →' (primary blue button) and 'See How It Works ↓' (ghost/text link, scrolls to how-it-works section). Below CTAs: social proof bar with text 'Trusted by faculty at California Community Colleges' and 5 placeholder gray rounded rectangles representing institution logos. Right side: animated product mockup built in CSS/SVG showing a browser frame containing a scan results dashboard. The mockup should animate on page load: (1) score gauge animates from 0 to 72 over 1.5s, (2) severity badges (Critical: 3, Serious: 12, Moderate: 24, Minor: 8) pop in staggered with scale animation, (3) rubric section bars (A: 80%, B: 60%, C: 75%, D: 65%) fill from left to right. Background: white to slate-50 subtle gradient. Respect prefers-reduced-motion by skipping animations.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F002"],
+      "blocks": [],
+      "phase": 3,
+      "verification": [
+        "Hero takes approximately full viewport height on desktop",
+        "Split layout renders correctly: text left, mockup right on desktop",
+        "On mobile, layout stacks vertically: text on top, mockup below",
+        "Eyebrow text is blue, uppercase, small, with wide tracking",
+        "Headline renders in Plus Jakarta Sans extrabold at appropriate size",
+        "Both CTA buttons are visible and functional",
+        "'Request a Pilot' scrolls to the CTA form section",
+        "'See How It Works' scrolls to the how-it-works section",
+        "Social proof bar with placeholder logos is visible below CTAs",
+        "Product mockup shows a browser frame with dashboard content",
+        "Score gauge animates from 0 to 72 on load",
+        "Severity badges appear with staggered animation",
+        "Section progress bars animate to their target widths",
+        "With prefers-reduced-motion, animations are instant (no motion)"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F004",
+      "section": "problem",
+      "name": "Problem Statement Section",
+      "description": "Build a section with id='problem' that names the three core pain points faculty face. Section eyebrow: 'The Problem' in simplify-blue. Headline: 'Your courses deserve better than a patchwork of tools.' Subtext: 'Faculty shouldn't need four different tools, three browser tabs, and a rubric spreadsheet just to make their courses accessible.' Below, a 3-column card grid (stacks to single column on mobile) with white cards, rounded-2xl, subtle border and shadow. Card 1 — icon: Layers, title: 'Tool Overload', description about UDOIT/Ally/Pope Tech/Canvas checker not talking to each other. Card 2 — icon: Languages, title: 'Rubric Disconnect', description about POCR reviewers saying 'Section D, Element 12' while tools say 'WCAG 2.1 SC 1.3.1'. Card 3 — icon: MousePointerClick, title: 'Flag Without Fix', description about tools telling what's wrong but leaving manual page-by-page fixing. Each card should fade-up on scroll into view with 100ms stagger between cards using Framer Motion.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F003"],
+      "blocks": [],
+      "phase": 3,
+      "verification": [
+        "Section has id='problem' for anchor navigation",
+        "Eyebrow text reads 'The Problem' in blue",
+        "Headline and subtext render with correct typography",
+        "Three cards display in a row on desktop, stack on mobile",
+        "Each card has an icon, title, and description",
+        "Cards have white background, rounded corners, border, and shadow",
+        "Cards animate in on scroll (fade up with stagger)",
+        "Card content accurately reflects the three pain points from the PRD"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F005",
+      "section": "solution",
+      "name": "Solution Overview Section",
+      "description": "Build a section with id='solution' on a slate-50 background. Eyebrow: 'The Solution'. Headline: 'One scan. Every rubric. One-click fixes.' Subtext about SIMPLIFY replacing the patchwork with a single Canvas plug-in. Below the text, a large product screenshot mockup (built as a styled HTML/CSS component, not an image) showing the SIMPLIFY scan dashboard. The mockup should be inside a browser-chrome frame (rounded top bar with three dots) and display: overall score ring showing 72/100, four severity cards (Critical: 3 red, Serious: 12 amber, Moderate: 24 blue, Minor: 8 gray), rubric section breakdown bars (A: Content Presentation 80%, B: Interaction 60%, C: Assessment 75%, D: Accessibility 65%), and action buttons ('Fix All Auto-Fixable (18)', 'Export Report', 'Schedule Rescan'). The mockup should have subtle annotation callout labels pointing to key features. Animate on scroll.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F003", "F004"],
+      "blocks": [],
+      "phase": 3,
+      "verification": [
+        "Section has id='solution' with slate-50 background",
+        "Eyebrow, headline, and description text render correctly",
+        "Product mockup displays inside a browser-chrome frame",
+        "Score ring/gauge shows 72/100",
+        "Four severity cards show correct numbers and colors",
+        "Rubric section bars show percentages with labels",
+        "Action buttons are visible in the mockup",
+        "Mockup is responsive and doesn't overflow on mobile",
+        "Section animates in on scroll"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F006",
+      "section": "features",
+      "name": "Core Features Deep Dive — Four Feature Rows",
+      "description": "Build a section with id='features' containing four feature showcases in alternating left-right layout. Odd rows: text left, visual right. Even rows: visual left, text right. Each feature block has: icon (from Lucide), eyebrow, title, description paragraph, and 4 bullet points. Feature 1 (ScanSearch icon): 'Course Scanner' — full-course scan in seconds, bullets about WCAG checks, document scanning, broken links, course structure. Feature 2 (BookOpen icon): 'Rubric-Aligned Reports' — reports in rubric language, bullets about rubric selection, grouping by section, element-level scoring, PDF export. Feature 3 (Wand2 icon): 'One-Click Fixes' — don't just find problems, fix them, bullets about AI alt text, heading repair, contrast fixes, bulk operations with undo. Feature 4 (BarChart3 icon): 'Institutional Dashboard' — see the big picture, bullets about department aggregation, trend reporting, support queue, role-based access. Each feature's visual side should contain a styled mockup component illustrating that feature. Animate each row on scroll (text and visual stagger in from their respective sides).",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F003", "F004", "F005"],
+      "blocks": [],
+      "phase": 4,
+      "verification": [
+        "Section has id='features'",
+        "Four feature rows display with alternating text/visual layout",
+        "On mobile, all rows stack to text-on-top, visual-below",
+        "Each feature has an icon, eyebrow, title, description, and bullet list",
+        "Feature content matches the PRD's four core capabilities",
+        "Each feature has a visual mockup on the opposite side of the text",
+        "Rows animate on scroll with appropriate direction",
+        "Bullet points use checkmark or similar icons",
+        "Typography follows the design system (Plus Jakarta Sans headings, Inter body)"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F007",
+      "section": "how-it-works",
+      "name": "How It Works — Three-Step Process",
+      "description": "Build a section with id='how-it-works' showing a simple 3-step process. Eyebrow: 'How It Works'. Headline: 'Three steps to a better course.' Three columns connected by a horizontal line or arrow graphic. Step 1: icon MousePointerClick, number '1' in a blue circle, title 'Scan', description about launching from Canvas nav, selecting rubrics, clicking Scan Course. Step 2: icon FileSearch, number '2', title 'Review', description about results organized by rubric section with plain-language explanations. Step 3: icon Sparkles, number '3', title 'Fix', description about applying one-click fixes or following guided instructions, watching score climb. On mobile, steps stack vertically with a vertical connecting line. Each step fades in on scroll with stagger.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F005", "F006"],
+      "blocks": [],
+      "phase": 4,
+      "verification": [
+        "Section has id='how-it-works'",
+        "Three steps display in a horizontal row on desktop",
+        "Steps stack vertically on mobile",
+        "Each step has a numbered circle, icon, title, and description",
+        "A connecting line or arrow graphic links the three steps",
+        "Steps animate in on scroll with stagger",
+        "Content matches the Scan → Review → Fix flow from the PRD"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F008",
+      "section": "rubrics",
+      "name": "Rubric Alignment — Tabbed Interface",
+      "description": "Build a section with id='rubrics' with a tabbed interface using Radix UI Tabs. Eyebrow: 'Framework Alignment'. Headline: 'Built on the rubrics you already trust.' Description text about every scan rule mapping to rubric elements. Three tabs: 'CVC-OEI', 'Quality Matters', 'Peralta Equity'. Tab 1 (CVC-OEI): subtitle 'California Virtual Campus — Online Education Initiative', bullet list of capabilities, and 4 horizontal coverage bars — A: Content Presentation 85%, B: Interaction 50%, C: Assessment 40%, D: Accessibility 95%. Tab 2 (Quality Matters): subtitle 'QM Higher Education Rubric, 7th Edition', bullet list, and 8 coverage bars for Standards 1-8 with percentages (60%, 45%, 40%, 55%, 35%, 50%, 60%, 95%). Tab 3 (Peralta Equity): subtitle 'Peralta Online Equity Rubric 3.0', bullet list, and 8 elements showing Automated vs. Guided Checklist badges (E1-E3 automated, E4-E7 guided, E8 both). Active tab should have a blue underline indicator that slides to follow selection. Tab content should cross-fade on switch. Coverage bars should animate their widths when the tab becomes visible.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F006", "F007"],
+      "blocks": [],
+      "phase": 4,
+      "verification": [
+        "Section has id='rubrics'",
+        "Three tabs are visible and clickable",
+        "Clicking a tab switches the content panel",
+        "Active tab has a blue underline indicator",
+        "CVC-OEI tab shows 4 coverage bars with correct percentages",
+        "QM tab shows 8 coverage bars with correct percentages",
+        "Peralta tab shows 8 elements with Automated/Checklist badges",
+        "Coverage bars animate their widths when visible",
+        "Tabs are keyboard accessible (arrow keys to switch)",
+        "Content transitions smoothly between tabs"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F009",
+      "section": "comparison",
+      "name": "Competitive Comparison Table",
+      "description": "Build a section with id='comparison'. Eyebrow: 'Why SIMPLIFY?'. Headline: 'Everything you need. Nothing you don't.' A responsive comparison table with columns: Feature, SIMPLIFY, UDOIT, Ally, Pope Tech, Canvas Built-in. 14 feature rows: Full-course HTML scan, Document scanning, Course structure analysis, CVC-OEI rubric alignment, QM alignment, Peralta Equity rubric, One-click auto-fixes, AI-generated alt text, Bulk fix operations, Institutional dashboard, PDF report export, UDL content variety check, Equity self-assessment, Progress tracking over time. Use green checkmark for yes, gray dash for no, amber half-circle for partial. SIMPLIFY column highlighted with a light blue background. All SIMPLIFY rows should be green checkmarks. On mobile (< 768px): convert to stacked comparison cards showing SIMPLIFY vs. one competitor at a time with a selector dropdown, or horizontally scrollable table.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F006"],
+      "blocks": [],
+      "phase": 4,
+      "verification": [
+        "Section has id='comparison'",
+        "Table displays all 14 feature rows and 6 columns on desktop",
+        "SIMPLIFY column is visually highlighted with blue background",
+        "Green checkmarks appear for all SIMPLIFY features",
+        "Competitor columns show correct yes/no/partial indicators per PRD data",
+        "Table is readable and functional on mobile (scrollable or card layout)",
+        "Table headers are sticky or clearly visible when scrolling"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F010",
+      "section": "testimonials",
+      "name": "Testimonial Carousel",
+      "description": "Build a section with id='testimonials'. Eyebrow: 'What Educators Say'. Headline: 'Faculty love it. Admins trust it.' A carousel showing testimonial cards. Four testimonials: (1) Dr. Maria Santos, Biology Faculty — about SIMPLIFY doing her course in 30 seconds and auto-fixing half the issues, (2) James Chen, Instructional Designer — about rubric-aligned reports being a game-changer for POCR, (3) Dr. Aisha Thompson, VP of Instruction — about reporting accessibility compliance percentages to accreditors, (4) Prof. David Reyes, English Faculty — about Peralta equity checklists opening his eyes. Each card shows: large quote text in italics, author name in bold, role, and institution. Display 3 cards at desktop, 1 at mobile. Include previous/next arrow buttons and dot indicators. Auto-advance every 6 seconds, pause on hover. Carousel must be accessible: aria-live='polite' region, keyboard navigable prev/next buttons.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F009"],
+      "blocks": [],
+      "phase": 4,
+      "verification": [
+        "Section has id='testimonials'",
+        "Four testimonial cards with correct quote content, authors, and roles",
+        "Desktop shows multiple cards, mobile shows one at a time",
+        "Previous/next buttons navigate between testimonials",
+        "Dot indicators show current position",
+        "Auto-advances every ~6 seconds",
+        "Pauses auto-advance on hover",
+        "Carousel is keyboard navigable",
+        "Uses aria-live for screen reader announcements"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F011",
+      "section": "stats",
+      "name": "Impact Statistics Strip with Animated Counters",
+      "description": "Build a full-width section with id='stats' on a blue gradient background (simplify-blue-dark to simplify-blue, left to right). White text. Four statistics in a horizontal row (2x2 grid on mobile): (1) '50%' — 'Less time on accessibility remediation', (2) '40%+' — 'Of issues auto-fixed with one click', (3) '35+' — 'Scan rules mapped across 3 rubrics', (4) '30 sec' — 'Average full-course scan time'. Each number should use a count-up animation triggered when the section scrolls into view. Numbers should count from 0 to target over 2 seconds with easeOut easing. The '50%' counts to 50 and appends '%', '40%+' counts to 40 and appends '%+', '35+' counts to 35 and appends '+', '30 sec' counts to 30 and appends ' sec'. Respect prefers-reduced-motion by showing final values immediately.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F010"],
+      "blocks": [],
+      "phase": 4,
+      "verification": [
+        "Section has id='stats' with blue gradient background",
+        "Four stats display in a row on desktop, 2x2 grid on mobile",
+        "Text is white and clearly readable against the blue background",
+        "Numbers animate (count up) when scrolled into view",
+        "Animation only plays once (not on every scroll pass)",
+        "With prefers-reduced-motion, numbers show immediately without animation",
+        "Labels accurately match the PRD metrics"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F012",
+      "section": "pricing",
+      "name": "Pricing Section with Three Tiers",
+      "description": "Build a section with id='pricing'. Eyebrow: 'Pricing'. Headline: 'Start with a free pilot. Scale when you're ready.' Three pricing cards in a row. Card 1 — 'Pilot': Free, '60 days, up to 10 courses', features list (full-course scanning, CVC-OEI + QM reporting, one-click fixes, PDF export, email support), outline CTA button 'Start Free Pilot'. Card 2 — 'Institution' (featured): Custom price, 'per institution / per year', features list (everything in Pilot plus document scanning, Peralta Equity + UDL, admin dashboard, scheduled scans, dedicated onboarding, priority support), primary filled CTA 'Request a Quote', 'Most Popular' badge at top of card, card should be slightly elevated/scaled and have a blue border to stand out. Card 3 — 'Enterprise': Custom price, 'multi-campus / district', features (everything in Institution plus multi-campus dashboards, custom rubrics, API access, SSO, dedicated success manager, SOC 2 docs), outline CTA 'Contact Sales'. Cards should have consistent height with feature lists aligned. On mobile, cards stack vertically with the featured card first.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F011"],
+      "blocks": [],
+      "phase": 5,
+      "verification": [
+        "Section has id='pricing'",
+        "Three pricing cards display in a row on desktop",
+        "Cards stack vertically on mobile",
+        "Pilot card shows 'Free' price and correct features",
+        "Institution card has 'Most Popular' badge and is visually elevated",
+        "Enterprise card shows correct features",
+        "All CTA buttons are clickable (scroll to form or open modal)",
+        "Feature lists use checkmark icons",
+        "Cards have consistent height on desktop"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F013",
+      "section": "faq",
+      "name": "FAQ Accordion Section",
+      "description": "Build a section with id='faq'. Eyebrow: 'FAQ'. Headline: 'Questions? We've got answers.' Use Radix UI Accordion component with 8 expandable items. Questions: (1) How is SIMPLIFY different from UDOIT? (2) Does SIMPLIFY replace Ally? (3) What rubrics does SIMPLIFY support? (4) Will SIMPLIFY change my course content without my approval? (5) How long does a scan take? (6) Is student data accessed or stored? (7) How does the pilot work? (8) Does it work with other LMS platforms? Answers should match the content from the app spec. Accordion items should animate open/close with smooth height transition. Only one item open at a time (or allow multiple — configurable). Chevron icon rotates on expand. Each item must be keyboard accessible (Enter/Space to toggle). Use proper ARIA attributes.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F012"],
+      "blocks": [],
+      "phase": 5,
+      "verification": [
+        "Section has id='faq'",
+        "Eight FAQ items display as an accordion",
+        "Clicking a question expands to show the answer",
+        "Expand/collapse animation is smooth",
+        "Chevron icon rotates when expanded",
+        "Accordion is keyboard navigable (Tab to focus, Enter to toggle)",
+        "ARIA attributes are correct (aria-expanded, aria-controls)",
+        "Answer content matches the app spec FAQ content",
+        "Section is contained within a max-width for readability"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F014",
+      "section": "cta-form",
+      "name": "Final CTA Section with Lead Capture Form",
+      "description": "Build a section with id='cta' with a split layout: left side has compelling copy, right side has the lead capture form. Left content — headline: 'Ready to simplify accessibility?', subheadline about joining the pilot program, free for 60 days, no credit card, 5-minute setup. Right side — a form built with React Hook Form and Zod validation containing: Full Name (text, required), Work Email (email, required, validated), Institution (text, required), Your Role (select dropdown with options: Faculty/Instructor, Instructional Designer, Accessibility Coordinator, Department Chair, Dean/VP of Instruction, IT/Canvas Admin, Other), How many courses? (select, optional: 1-5, 6-20, 21-100, 100+), Anything else? (textarea, optional). Submit button: 'Request Free Pilot →' in primary blue, full width. Below button: privacy note text. Client-side validation: show inline error messages below invalid fields on blur and on submit. On successful submit: replace form with a success message showing a checkmark animation, 'You're in! Check your email for next steps.' and a brief description of what happens next. Form should POST to /api/pilot-request (create a basic API route that logs the data and returns success). Background: slate-50.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F012", "F013"],
+      "blocks": [],
+      "phase": 5,
+      "verification": [
+        "Section has id='cta'",
+        "Split layout: copy on left, form on right (stacks on mobile)",
+        "All form fields render with correct types and labels",
+        "Required fields show validation errors when submitted empty",
+        "Email field validates email format",
+        "Select dropdowns have all specified options",
+        "Submit button is prominent and full-width within the form",
+        "Privacy note is visible below the submit button",
+        "On successful submit, form is replaced with success message",
+        "Success message includes a checkmark or similar confirmation visual",
+        "API route /api/pilot-request exists and returns a success response",
+        "Form is accessible: labels associated with inputs, errors announced"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F015",
+      "section": "footer",
+      "name": "Footer with Navigation and Legal Links",
+      "description": "Build a footer section with dark background (slate-900) and light text. Four-column grid on desktop, stacking on mobile. Column 1 (Brand): SIMPLIFY wordmark in white extrabold, tagline 'Accessible, usable, equitable courses — simplified.' in slate-400, social media icons (LinkedIn, Twitter/X) as icon buttons. Column 2 (Product): heading 'Product', links — Features, How It Works, Pricing, Rubric Alignment, Roadmap. Column 3 (Resources): heading 'Resources', links — Documentation, Blog, CVC-OEI Rubric (external), Quality Matters (external), Peralta Equity Rubric (external). Column 4 (Company): heading 'Company', links — About, Contact, Privacy Policy, Terms of Service, Accessibility Statement. Below the grid: a bottom bar with divider line, '© 2026 Simplify Inc. All rights reserved.' on left, 'Built with accessibility in mind' badge on right. Footer links that reference page sections should smooth-scroll. External links open in new tab with rel='noopener noreferrer'.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F002"],
+      "blocks": [],
+      "phase": 2,
+      "verification": [
+        "Footer renders with dark background and light text",
+        "Four columns display on desktop, stacking on mobile",
+        "SIMPLIFY wordmark and tagline are visible",
+        "All navigation links are present in correct columns",
+        "Internal links smooth-scroll to sections",
+        "External links open in new tabs",
+        "Copyright text shows '© 2026 Simplify Inc.'",
+        "Social media icons are present and clickable",
+        "Footer is accessible with proper heading structure"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F016",
+      "section": "accessibility",
+      "name": "WCAG 2.1 AA Compliance",
+      "description": "The landing page for an accessibility product MUST itself be fully accessible. Ensure: single H1 (in hero), proper heading hierarchy throughout (H2 for sections, H3 for cards/features), all images have descriptive alt text, color contrast meets 4.5:1 for body text and 3:1 for large text, all interactive elements are keyboard reachable via Tab and activatable via Enter/Space, visible focus indicators (2px blue outline) on all focusable elements, skip-navigation link at page top, semantic HTML (nav, main, section, article, footer elements), form fields have visible labels and associated error messages (aria-describedby), testimonial carousel has aria-live region and keyboard controls, all animations respect prefers-reduced-motion media query.",
+      "blocked_by": ["F001", "F002", "F003", "F004", "F005", "F006", "F007", "F008", "F009", "F010", "F011", "F012", "F013", "F014", "F015"],
+      "non_blocking": [],
+      "blocks": [],
+      "phase": 6,
+      "verification": [
+        "Only one H1 exists on the page (in the hero section)",
+        "Heading hierarchy is sequential (no skipped levels)",
+        "All images have alt text",
+        "Run browser color contrast checker — no failures on body text",
+        "Tab through the entire page — all interactive elements are reachable",
+        "Focus indicators are visible on every focusable element",
+        "Skip-nav link works (Tab from top, press Enter, focus moves to main content)",
+        "Semantic HTML elements are used (check source for nav, main, section, footer)",
+        "Form errors are associated with fields via aria-describedby",
+        "With prefers-reduced-motion enabled, no motion animations play"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F017",
+      "section": "responsive",
+      "name": "Responsive Design Across All Breakpoints",
+      "description": "Ensure the entire page is fully responsive from 320px to 2560px. Mobile (0-639px): single column layouts, stacked cards, hamburger nav, text sizes reduced appropriately, adequate touch targets (minimum 44x44px), no horizontal scroll. Tablet (640-1023px): 2-column layouts where applicable, condensed spacing. Desktop (1024px+): full layouts as designed, max-w-7xl container centered. Large (1280px+): additional breathing room. Specifically verify: hero stacks vertically on mobile, 3-column grids become single column, comparison table is scrollable or converts to cards, pricing cards stack (featured first), features section stacks (text above visual), footer columns stack. All text remains readable, no content is cut off or overlapping.",
+      "blocked_by": ["F001", "F002", "F003", "F004", "F005", "F006", "F007", "F008", "F009", "F010", "F011", "F012", "F013", "F014", "F015"],
+      "non_blocking": ["F016"],
+      "blocks": [],
+      "phase": 6,
+      "verification": [
+        "No horizontal scroll at any viewport width from 320px to 2560px",
+        "At 375px (iPhone): hero stacks, cards stack, nav is hamburger, form is full-width",
+        "At 768px (iPad): 2-column layouts appear where appropriate",
+        "At 1024px+: full desktop layout renders",
+        "At 1440px+: content is centered with appropriate max-width",
+        "All touch targets are at least 44x44px on mobile",
+        "Text is readable at all sizes without zooming",
+        "Images and mockups scale down without overflow",
+        "Comparison table is usable on mobile (scrollable or card layout)"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F018",
+      "section": "seo",
+      "name": "SEO and Meta Tags",
+      "description": "Configure complete SEO metadata in the root layout and/or page. Title: 'SIMPLIFY — Canvas Course Accessibility & Usability Plug-in | Simplify EdTech'. Meta description: 'SIMPLIFY is a Canvas LTI plug-in that scans your courses for accessibility and usability issues, reports against CVC-OEI, Quality Matters, and Peralta rubrics, and offers one-click fixes. Free pilot available.' Open Graph tags: og:title, og:description, og:type (website), og:image (placeholder). Twitter Card tags: twitter:card (summary_large_image), twitter:title, twitter:description. Add structured data (JSON-LD) in the head for: Organization (Simplify Inc.), SoftwareApplication (SIMPLIFY), and FAQPage (8 FAQ items). Ensure all sections have id attributes for deep linking.",
+      "blocked_by": ["F001"],
+      "non_blocking": ["F013"],
+      "blocks": [],
+      "phase": 2,
+      "verification": [
+        "Page title renders correctly in browser tab",
+        "View page source: meta description tag is present with correct content",
+        "View page source: Open Graph tags are present (og:title, og:description)",
+        "View page source: Twitter Card tags are present",
+        "View page source: JSON-LD structured data includes Organization, SoftwareApplication, FAQPage",
+        "FAQPage structured data contains all 8 questions and answers",
+        "All major sections have id attributes for anchor navigation"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F019",
+      "section": "performance",
+      "name": "Performance Optimization",
+      "description": "Optimize the page for fast loading and Core Web Vitals. Use next/font for font loading (no layout shift). Lazy load below-the-fold sections and images. Ensure hero content (above the fold) renders without waiting for animations. Minimize JavaScript bundle — use dynamic imports for Framer Motion animations on sections below the fold. Use CSS containment where appropriate. Target Lighthouse scores: Performance 90+, Accessibility 95+, Best Practices 90+, SEO 95+. Target Core Web Vitals: LCP < 2.5s, CLS < 0.1.",
+      "blocked_by": ["F001", "F002", "F003", "F004", "F005", "F006", "F007", "F008", "F009", "F010", "F011", "F012", "F013", "F014", "F015"],
+      "non_blocking": ["F016", "F017"],
+      "blocks": [],
+      "phase": 6,
+      "verification": [
+        "Page loads and hero is visible within 2 seconds on fast connection",
+        "No visible layout shift when fonts load (next/font handles this)",
+        "Below-the-fold content lazy loads (check network tab)",
+        "JavaScript bundle is reasonable size (check next build output)",
+        "Hero section renders before animation libraries fully load",
+        "No console errors on page load"
+      ],
+      "passes": false
+    }
+  ]
+}
