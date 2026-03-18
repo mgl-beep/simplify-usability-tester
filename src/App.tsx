@@ -325,10 +325,10 @@ export default function App() {
     } else {
       setCurrentView("simplify"); // Open on SIMPLIFY Dashboard after login
     }
-    // Show pilot welcome on first connection
-    if (!localStorage.getItem('simplify_pilot_welcome_seen')) {
-      setTimeout(() => setShowPilotWelcome(true), 500);
-    }
+    // Pilot welcome disabled for usability testing
+    // if (!localStorage.getItem('simplify_pilot_welcome_seen')) {
+    //   setTimeout(() => setShowPilotWelcome(true), 500);
+    // }
   };
 
   const handleDisconnect = () => {
