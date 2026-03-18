@@ -95,6 +95,8 @@ export async function scanAudioDescription(
   contentId: string,
   contentType: 'page' | 'assignment' | 'announcement' | 'discussion'
 ): Promise<ScanIssue[]> {
+  // Disabled for usability testing
+  return [];
   if (!html) return [];
 
   const issues: ScanIssue[] = [];

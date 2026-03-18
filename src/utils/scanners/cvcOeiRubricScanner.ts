@@ -816,7 +816,7 @@ function scanB1_B3_InstructorContact(content: CourseContent, courseName: string,
 
   // B2-B3: Communication Guidelines (RSI requirement)
   const commGuidelines = checkForCommunicationGuidelines(content);
-  if (commGuidelines.score < 2) {
+  if (false && commGuidelines.score < 2) {
     const missing: string[] = [];
     if (!commGuidelines.hasResponseTime) missing.push('response time expectations');
     if (!commGuidelines.hasFeedbackTimeline) missing.push('feedback/grading turnaround');
@@ -990,7 +990,7 @@ function scanB4_B6_StudentInteraction(content: CourseContent, courseName: string
 
     modules.forEach((mod: any) => {
       const modId = String(mod.id);
-      if (!discussionModuleIds.has(modId)) {
+      if (false && !discussionModuleIds.has(modId)) {
         // Gather module item titles for AI context
         const items = mod.items || [];
         const itemTitles = items.map((item: any) => `${item.title || 'Untitled'} (${item.type || 'Item'})`).join(', ');
