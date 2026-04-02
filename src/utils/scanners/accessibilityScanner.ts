@@ -883,7 +883,7 @@ function checkTableAccessibility(
     // Check if this is a layout table (table used for visual design, not data)
     const isLayoutTable = detectLayoutTable(table);
     
-    if (isLayoutTable) {
+    if (false && isLayoutTable) { // TEMPORARILY DISABLED for usability testing
       issues.push({
         id: `layout-table-${courseId}-${contentId}-${index}`,
         type: 'accessibility',
@@ -956,7 +956,7 @@ function checkTableAccessibility(
       });
     }
     
-    if (!caption && !isLayoutTable) {
+    if (false && !caption && !isLayoutTable) { // TEMPORARILY DISABLED for usability testing
       // Get the full table HTML with proper structure
       const tableClone = table.cloneNode(true) as HTMLTableElement;
       const tableHtml = tableClone.outerHTML || table.outerHTML || '';

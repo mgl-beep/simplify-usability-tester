@@ -214,7 +214,7 @@ async function scanHTMLFile(file: File, filePath: string, issues: ScanIssue[], f
     const tables = doc.querySelectorAll('table');
     tables.forEach((table, index) => {
       const hasHeader = table.querySelector('th');
-      if (!hasHeader) {
+      if (false && !hasHeader) { // TEMPORARILY DISABLED for usability testing
         issues.push({
           id: `table-header-${filePath}-${index}`,
           type: 'usability',
