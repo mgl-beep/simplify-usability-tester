@@ -143,7 +143,7 @@ function scanA1_A3_Objectives(content: CourseContent, courseName: string, course
         whereToAdd: hasObjectives.whereToAdd, // Store where objectives should be added
         whereToAddPageUrl: hasObjectives.whereToAddPageUrl || undefined // Specific page URL to update
       });
-    } else if (!hasObjectives.measurable) {
+    } else if (false && !hasObjectives.measurable) { // TEMPORARILY DISABLED for usability testing
       issues.push({
         id: `a1-a3-vague-objectives-${courseId}-${index}`,
         type: 'design',
